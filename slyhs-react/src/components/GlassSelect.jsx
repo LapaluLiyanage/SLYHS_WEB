@@ -25,6 +25,7 @@ export default function GlassSelect({ name, value, onChange, error, placeholder,
   const place = useCallback(() => {
     const btn = btnRef.current;
     if (!btn) return;
+    if (window.innerWidth < 640) { setPos({ sheet: true }); return; }
     const r = btn.getBoundingClientRect();
     const below = window.innerHeight - r.bottom - 12;
     const above = r.top - 12;
@@ -121,8 +122,8 @@ export default function GlassSelect({ name, value, onChange, error, placeholder,
   useLayoutEffect(() => {
     if (!open || !listRef.current || prefersReducedMotion) return;
     gsap.fromTo(listRef.current,
-      { opacity: 0, y: pos?.up ? 8 : -8, scale: .98 },
-      { opacity: 1, y: 0, scale: 1, duration: .28, ease: 'power3.out' });
+      pos?.sheet ? { opacity: 0, y: 70 } : { opacity: 0, y: pos?.up ? 8 : -8, scale: .98 },
+      { opacity: 1, y: 0, scale: 1, duration: pos?.sheet ? .4 : .28, ease: 'power3.out' });
     gsap.fromTo(listRef.current.children, { opacity: 0, x: -6 }, { opacity: 1, x: 0, duration: .3, ease: 'power2.out', stagger: .012, delay: .04 });
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -160,15 +161,17 @@ export default function GlassSelect({ name, value, onChange, error, placeholder,
       </button>
 
       {open && pos && createPortal(
+        <>
+        {pos.sheet && <div className="sheet-backdrop" aria-hidden="true" />}
         <ul
           ref={listRef}
           id={listId}
           role="listbox"
           aria-labelledby={`${name}-label`}
-          className={'gs-list' + (pos.up ? ' is-up' : '')}
+          className={'gs-list' + (pos.up ? ' is-up' : '') + (pos.sheet ? ' is-sheet' : '')}
           data-lenis-prevent
           onMouseDown={(e) => e.preventDefault()} // keep focus on the trigger
-          style={{ left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom, maxHeight: pos.maxHeight }}
+          style={pos.sheet ? undefined : { left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom, maxHeight: pos.maxHeight }}
         >
           {options.map((o, i) => (
             <li
@@ -186,7 +189,8 @@ export default function GlassSelect({ name, value, onChange, error, placeholder,
               </svg>
             </li>
           ))}
-        </ul>,
+        </ul>
+        </>,
         document.body
       )}
     </>

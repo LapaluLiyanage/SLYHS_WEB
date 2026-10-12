@@ -5,6 +5,7 @@ import App from './App';
 import './styles/base.css';
 import './styles/join.css';
 import './styles/app.css';
+import './styles/mobile.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

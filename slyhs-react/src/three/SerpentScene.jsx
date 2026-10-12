@@ -212,14 +212,29 @@ function Serpent({ small }) {
     dustUniforms.uTime.value = u.uTime.value;
     dustUniforms.uPR.value = state.viewport.dpr;
     dustUniforms.uOpacity.value = st.opacity * .8;
+    if (small) u.uOpacity.value *= .85; // keep text readable on phones
 
     const g = group.current;
     const k = 1 - Math.pow(.001, dt); // frame-rate independent easing
-    g.position.x += (st.x - g.position.x) * k * 2;
-    g.position.y += (st.y - g.position.y) * k * 2;
+
+    // Fit the body inside the screen. On tall, narrow screens the stretched-out snake
+    // stands upright (rotated about Z) so it keeps its length instead of running off the sides.
+    const vw = state.viewport.width;
+    const vh = state.viewport.height;
+    const portrait = vh > vw * 1.15 ? 1 : 0;
+    const stretch = 1 - st.coil;
+    const bodyLen = 10.4 + (4.6 - 10.4) * st.coil;
+    const upright = portrait * stretch;
+    const avail = (vw * .94) + (vh * .86 - vw * .94) * upright;
+    const fit = Math.min(1, avail / (bodyLen * st.scale));
+    const flip = st.rotY < 0 ? -1 : 1; // lean the other way when the pose looks left
+
+    g.position.x += (st.x * (portrait ? .35 : 1) - g.position.x) * k * 2;
+    g.position.y += (st.y * (portrait ? .6 : 1) - g.position.y) * k * 2;
     g.rotation.y += (st.rotY + st.spin + pointer.current.x * .25 - g.rotation.y) * k;
     g.rotation.x += (st.rotX + pointer.current.y * .12 - g.rotation.x) * k;
-    g.scale.setScalar(st.scale * (small ? .62 : 1));
+    g.rotation.z += (upright * 1.18 * flip - g.rotation.z) * k;
+    g.scale.setScalar(st.scale * fit);
   });
 
   return (

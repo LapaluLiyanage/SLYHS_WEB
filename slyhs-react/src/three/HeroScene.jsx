@@ -169,9 +169,24 @@ export default function HeroScene({ sectionRef, src = '/assets/hero-snake.jpg', 
       pointer.current.hover = 1;
     };
     const onLeave = () => { pointer.current.hover = 0; };
+    // touch: a tap sends a ripple through the photo and scatters the fireflies, then it settles
+    let settle = 0;
+    const onTap = (e) => {
+      if (e.pointerType !== 'touch') return;
+      onMove(e);
+      clearTimeout(settle);
+      settle = setTimeout(onLeave, 900);
+    };
     el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerdown', onTap);
     el.addEventListener('pointerleave', onLeave);
-    return () => { io.disconnect(); el.removeEventListener('pointermove', onMove); el.removeEventListener('pointerleave', onLeave); };
+    return () => {
+      clearTimeout(settle);
+      io.disconnect();
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerdown', onTap);
+      el.removeEventListener('pointerleave', onLeave);
+    };
   }, [sectionRef]);
 
   const count = typeof window !== 'undefined' && window.innerWidth < 700 ? 70 : 160;

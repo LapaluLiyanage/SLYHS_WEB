@@ -44,6 +44,7 @@ export default function GlassDate({ name, value, onChange, error, placeholder = 
   const place = useCallback(() => {
     const btn = btnRef.current;
     if (!btn) return;
+    if (window.innerWidth < 640) { setPos({ sheet: true }); return; }
     const r = btn.getBoundingClientRect();
     const below = window.innerHeight - r.bottom - 12;
     const above = r.top - 12;
@@ -110,7 +111,9 @@ export default function GlassDate({ name, value, onChange, error, placeholder = 
   /* ---- animation ---- */
   useLayoutEffect(() => {
     if (!open || !popRef.current || prefersReducedMotion) return;
-    gsap.fromTo(popRef.current, { opacity: 0, y: pos?.up ? 8 : -8, scale: .97 }, { opacity: 1, y: 0, scale: 1, duration: .28, ease: 'power3.out' });
+    gsap.fromTo(popRef.current,
+      pos?.sheet ? { opacity: 0, y: 80 } : { opacity: 0, y: pos?.up ? 8 : -8, scale: .97 },
+      { opacity: 1, y: 0, scale: 1, duration: pos?.sheet ? .4 : .28, ease: 'power3.out' });
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useLayoutEffect(() => {
@@ -223,12 +226,14 @@ export default function GlassDate({ name, value, onChange, error, placeholder = 
       </button>
 
       {open && pos && createPortal(
+        <>
+        {pos.sheet && <div className="sheet-backdrop" aria-hidden="true" />}
         <div
           ref={popRef}
           role="dialog"
           aria-label="Choose date"
-          className={'dp-pop' + (pos.up ? ' is-up' : '')}
-          style={{ left: pos.left, width: POP_W, top: pos.top, bottom: pos.bottom }}
+          className={'dp-pop' + (pos.up ? ' is-up' : '') + (pos.sheet ? ' is-sheet' : '')}
+          style={pos.sheet ? undefined : { left: pos.left, width: POP_W, top: pos.top, bottom: pos.bottom }}
           onMouseDown={(e) => { if (!e.target.closest('button')) e.preventDefault(); }}
           onKeyDown={onPopKeyDown}
         >
@@ -309,7 +314,8 @@ export default function GlassDate({ name, value, onChange, error, placeholder = 
             <button type="button" className="dp-link" onClick={() => { onChange(name, ''); close(); }}>Clear</button>
             <button type="button" className="dp-link" onClick={() => pick(new Date())}>Today</button>
           </div>
-        </div>,
+        </div>
+        </>,
         document.body
       )}
     </>

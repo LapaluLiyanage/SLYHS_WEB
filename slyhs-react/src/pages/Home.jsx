@@ -62,6 +62,19 @@ export default function Home() {
       return () => goPose('hidden', .4);
     }
 
+    // phones: each card animates as it reaches the screen (a shared trigger would fire
+    // while later cards are still far below), sliding in from alternating sides, no 3D tilt
+    const mobile = window.matchMedia('(max-width: 760px)').matches;
+    const rise = (sel, trigger, start, desk) => {
+      if (mobile) {
+        gsap.utils.toArray(sel).forEach((el, i) => {
+          gsap.from(el, { x: i % 2 ? 38 : -38, y: 54, scale: .96, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%' } });
+        });
+      } else {
+        gsap.from(sel, { ...desk, scrollTrigger: { trigger, start } });
+      }
+    };
+
     /* intro */
     gsap.timeline({ defaults: { ease: 'expo.out', duration: 1.2 }, delay: .1 })
       .from('.hero-media', { scale: 1.18, duration: 2.6, ease: 'power3.out' }, 0)
@@ -75,10 +88,7 @@ export default function Home() {
     gsap.to('.hero-inner', { y: -110, opacity: .05, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=650', scrub: true } });
 
     /* pillars: rise out of depth */
-    gsap.from('.pillar', {
-      y: 120, rotationX: 28, transformOrigin: '50% 100%', transformPerspective: 1100, opacity: 0, duration: 1.4, ease: 'expo.out', stagger: .12,
-      scrollTrigger: { trigger: '.pillars', start: 'top 88%' }
-    });
+    rise('.pillar', '.pillars', 'top 88%', { y: 120, rotationX: 28, transformOrigin: '50% 100%', transformPerspective: 1100, opacity: 0, duration: 1.4, ease: 'expo.out', stagger: .12 });
     const viz = (trigger) => gsap.timeline({ scrollTrigger: { trigger, start: 'top 72%' } });
     viz('.viz-connect')
       .from('.district .chip', { x: -16, opacity: 0, stagger: .08, duration: .7, ease: 'power3.out' })
@@ -107,10 +117,7 @@ export default function Home() {
     gsap.from('.partners', { opacity: 0, y: 30, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: '.partners', start: 'top 92%' } });
 
     /* stats */
-    gsap.from('.stat', {
-      y: 90, rotationY: -18, transformPerspective: 1000, opacity: 0, duration: 1.3, ease: 'expo.out', stagger: .12,
-      scrollTrigger: { trigger: '.stats', start: 'top 84%' }
-    });
+    rise('.stat', '.stats', 'top 84%', { y: 90, rotationY: -18, transformPerspective: 1000, opacity: 0, duration: 1.3, ease: 'expo.out', stagger: .12 });
     gsap.utils.toArray('.stat-num').forEach((el) => {
       const end = Number(el.dataset.count);
       const suffix = el.dataset.suffix || '';
@@ -135,16 +142,30 @@ export default function Home() {
         .to('.path-line span', { scaleX: 1, ease: 'none', duration: 2.2 }, .2)
         .fromTo(serpentState, { spin: 0 }, { spin: Math.PI * 1.5, ease: 'none', duration: 2.6 }, 0);
     });
-    mm.add('(max-width: 1079px)', () => {
+    mm.add('(min-width: 761px) and (max-width: 1079px)', () => {
       gsap.from('.step', { y: 60, opacity: 0, duration: 1, ease: 'expo.out', stagger: .1, scrollTrigger: { trigger: '.path', start: 'top 85%' } });
       gsap.to('.path-line span', { scaleX: 1, scrollTrigger: { trigger: '.path-wrap', start: 'top 75%', end: 'bottom 45%', scrub: .6, onUpdate: (self) => light(self.progress) } });
     });
+    // phones: a vertical timeline that draws itself down the page; each number lights up
+    // and pops as its card reaches the middle of the screen
+    mm.add('(max-width: 760px)', () => {
+      gsap.fromTo('.path-line span', { scaleY: 0 }, {
+        scaleY: 1, ease: 'none',
+        scrollTrigger: { trigger: '.path-wrap', start: 'top 70%', end: 'bottom 62%', scrub: .5 }
+      });
+      gsap.utils.toArray('.step').forEach((card) => {
+        const num = card.querySelector('.step-n');
+        gsap.from(card, { x: 44, opacity: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: card, start: 'top 90%' } });
+        ScrollTrigger.create({
+          trigger: card, start: 'top 62%',
+          onEnter: () => { num.classList.add('is-lit'); gsap.fromTo(num, { scale: .55 }, { scale: 1, duration: .7, ease: 'back.out(3)' }); },
+          onLeaveBack: () => num.classList.remove('is-lit')
+        });
+      });
+    });
 
     /* events */
-    gsap.from('.event', {
-      y: 90, rotationX: 20, transformPerspective: 1000, transformOrigin: '50% 100%', opacity: 0, duration: 1.2, ease: 'expo.out', stagger: .12,
-      scrollTrigger: { trigger: '.events', start: 'top 84%' }
-    });
+    rise('.event', '.events', 'top 84%', { y: 90, rotationX: 20, transformPerspective: 1000, transformOrigin: '50% 100%', opacity: 0, duration: 1.2, ease: 'expo.out', stagger: .12 });
 
     /* join band */
     gsap.fromTo('.join-band', { clipPath: 'inset(12% 9% 12% 9% round 56px)' }, {

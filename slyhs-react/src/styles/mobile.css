@@ -1,0 +1,88 @@
+/* ======================= mobile ======================= */
+html { -webkit-tap-highlight-color: transparent; }
+.btn, .chip-opt, .check, .gs-trigger { touch-action: manipulation; }
+.sheet-backdrop { position: fixed; inset: 0; z-index: 119; background: rgba(2, 4, 3, .62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); touch-action: none; }
+
+/* dropdown + calendar become bottom sheets on phones */
+.gs-list.is-sheet, .dp-pop.is-sheet {
+  left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+  width: min(100%, 440px) !important; margin-inline: auto;
+  border-radius: 24px 24px 0 0; transform-origin: bottom center;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+}
+.gs-list.is-sheet { max-height: min(62vh, 460px) !important; padding-top: 12px; }
+.gs-list.is-sheet::before, .dp-pop.is-sheet::before {
+  content: ""; display: block; width: 42px; height: 4px; border-radius: 4px; margin: -4px auto 10px; background: rgba(238, 242, 234, .22);
+}
+.gs-list.is-sheet .gs-opt { padding: 14px 14px; font-size: 16px; }
+.dp-pop.is-sheet .dp-day { aspect-ratio: auto; height: 44px; }
+
+@media (max-width: 760px) {
+  .site-header {
+    margin-left: max(4vw, env(safe-area-inset-left)); margin-right: max(4vw, env(safe-area-inset-right));
+    top: max(10px, env(safe-area-inset-top)); height: 64px;
+  }
+  .lang-switch button { padding: 11px 12px; min-width: 40px; }
+  .menu-toggle { width: 48px; height: 48px; }
+  .mobile-menu { padding-top: max(112px, calc(env(safe-area-inset-top) + 96px)); padding-bottom: max(32px, env(safe-area-inset-bottom)); overflow-y: auto; }
+  .mobile-menu a:not(.btn) { padding: 16px 0; }
+
+  .hero { padding-left: 6vw; padding-right: 6vw; }
+  .hero-ctas { width: 100%; flex-direction: column; align-items: stretch; }
+  .hero-ctas .btn { width: 100%; }
+  .checks { gap: 8px 16px; }
+
+  .pillars { gap: 14px; margin-top: 64px; }
+  .pillar { min-height: 0; padding: 24px 22px; gap: 14px; }
+  .pillar p { max-width: none; }
+  .viz-bars { height: 170px; }
+  .viz-radar { height: 180px; }
+  .partners { padding: 32px 0 44px; margin-top: 48px; }
+
+  .section { padding-left: 6vw; padding-right: 6vw; }
+  .stat { padding: 26px 22px; }
+  .event { padding: 24px 22px; }
+  .join-band { border-radius: 26px; padding: 52px 7vw; }
+  .site-footer { padding-left: 6vw; padding-right: 6vw; padding-bottom: calc(36px + env(safe-area-inset-bottom)); }
+  .safety { padding: 16px 18px; }
+
+  /* "Your path": vertical timeline */
+  .path { grid-template-columns: 1fr; gap: 14px; padding-left: 54px; }
+  .step { position: relative; padding: 22px 20px; }
+  .step .step-n { position: absolute; left: -54px; top: 20px; z-index: 2; }
+  .path-line { display: block; left: 16.5px; right: auto; top: 37px; bottom: 37px; width: 1px; height: auto; }
+  .path-line span { width: 100%; height: 100%; transform-origin: 50% 0; transform: scaleY(0); background: linear-gradient(180deg, rgba(201, 238, 110, .25), var(--lime)); }
+
+  /* Join: swipeable tiers */
+  .tiers {
+    display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 6vw; overscroll-behavior-x: contain;
+    margin-inline: -6vw; padding: 6px 6vw 18px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    align-items: stretch;
+  }
+  .tiers::-webkit-scrollbar { display: none; }
+  .tier { flex: 0 0 min(78vw, 300px); scroll-snap-align: center; margin-top: 0 !important; }
+  .tiers-note { font-size: 14px; padding: 16px 18px; }
+
+  /* Join: registration */
+  .register { gap: 14px; }
+  .reg-aside { padding: 22px 20px; gap: 10px; }
+  .reg-steps { flex-direction: row; justify-content: space-between; margin-top: 4px; }
+  .reg-steps li { padding: 4px 0; gap: 0; }
+  .reg-steps li > span:last-child { display: none; }
+  .reg-safe { display: none; }
+  .form-card { padding: 24px 18px; min-height: 0; }
+  .field-grid { grid-template-columns: 1fr; }
+  .chip-opt span { padding: 11px 15px; }
+  .form-nav { gap: 10px; }
+  .btn-nav { flex: 1; padding: 16px 18px; }
+  #nextBtn, #submitBtn { margin-left: 0; }
+  .field input, .gs-trigger, .field textarea { font-size: 16px; } /* stops iOS zooming into focused fields */
+  .tr-name { font-size: 30px; }
+  .success-mark { width: 56px; height: 56px; }
+}
+
+@media (max-width: 380px) {
+  .hero-title { font-size: clamp(38px, 11.5vw, 44px); }
+  .brand-short { letter-spacing: .14em; }
+}

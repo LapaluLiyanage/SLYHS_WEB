@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import { useSmooth } from '../lib/smooth';
-import { gsap, useGSAP, prefersReducedMotion } from '../lib/gsap';
+import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '../lib/gsap';
 import usePageFX from '../lib/usePageFX';
 import { choreograph, goPose } from '../three/choreography';
 import Hero from '../components/Hero';
@@ -365,14 +365,32 @@ export default function Join() {
       .from('.hero-ctas > *', { y: 26, opacity: 0, stagger: .09 }, 1.05);
     gsap.to('.hero-inner', { y: -110, opacity: .05, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=600', scrub: true } });
 
-    // tiers climb into place one rung at a time
-    gsap.from('.tier', {
-      y: 160, rotationX: 35, transformPerspective: 1000, transformOrigin: '50% 100%', opacity: 0,
-      duration: 1.4, ease: 'expo.out', stagger: .12,
-      scrollTrigger: { trigger: '.tiers', start: 'top 85%' }
-    });
-    gsap.from('.reg-aside', { x: -50, opacity: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.register', start: 'top 82%' } });
-    gsap.from('.form-card', { y: 80, rotationX: 12, transformPerspective: 1200, opacity: 0, duration: 1.2, ease: 'expo.out', delay: .1, scrollTrigger: { trigger: '.register', start: 'top 82%' } });
+    const mobile = window.matchMedia('(max-width: 760px)').matches;
+    if (mobile) {
+      // phones: tiers are a swipeable row; they fan in from the right, then a hint nudges the row once
+      gsap.from('.tier', { x: 90, opacity: 0, scale: .94, duration: 1.1, ease: 'expo.out', stagger: .09, scrollTrigger: { trigger: '.tiers', start: 'top 88%' } });
+      gsap.from('.reg-aside', { y: 50, opacity: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.reg-aside', start: 'top 90%' } });
+      gsap.from('.form-card', { y: 70, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.form-card', start: 'top 92%' } });
+      const row = document.querySelector('.tiers');
+      if (row) {
+        ScrollTrigger.create({
+          trigger: row, start: 'top 70%', once: true,
+          onEnter: () => {
+            const nudge = { x: 0 };
+            gsap.to(nudge, { x: 46, duration: .6, delay: 1.2, ease: 'power2.out', yoyo: true, repeat: 1, onUpdate: () => { row.scrollLeft = nudge.x; } });
+          }
+        });
+      }
+    } else {
+      // tiers climb into place one rung at a time
+      gsap.from('.tier', {
+        y: 160, rotationX: 35, transformPerspective: 1000, transformOrigin: '50% 100%', opacity: 0,
+        duration: 1.4, ease: 'expo.out', stagger: .12,
+        scrollTrigger: { trigger: '.tiers', start: 'top 85%' }
+      });
+      gsap.from('.reg-aside', { x: -50, opacity: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.register', start: 'top 82%' } });
+      gsap.from('.form-card', { y: 80, rotationX: 12, transformPerspective: 1200, opacity: 0, duration: 1.2, ease: 'expo.out', delay: .1, scrollTrigger: { trigger: '.register', start: 'top 82%' } });
+    }
 
     return () => { goPose('hidden', .4); };
   }, { scope });
