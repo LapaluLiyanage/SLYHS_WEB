@@ -84,7 +84,8 @@ export const POLICIES = {
         'Every child and young person has the right to be safe. We will not tolerate abuse, neglect, bullying or exploitation in any society activity, online or in person.'
       ]],
       ['Joining as a member under 18', [
-        'Members under 18 need the consent of a parent or guardian when they register. We ask for the guardian\'s details and keep them private.'
+        'Students aged 7 and over can join. Members under 18 need the consent of a parent or guardian when they register. We ask for the guardian\'s details and keep them private.',
+        'Children aged 7 to 14 join as Junior Explorers. They take part only in talks, workshops and walks designed for their age, and a parent, guardian or teacher stays with them at every activity. Junior Explorers never handle wildlife.'
       ]],
       ['Activities', [
         'Field walks and meetings for young members are led by more than one adult, and an adult is never alone with a single child. Parents and guardians are told where and when an activity takes place. Trips to wild places include a safety briefing and the first-aid guide.',
