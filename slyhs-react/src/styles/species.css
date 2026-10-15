@@ -319,3 +319,17 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 
 /* preloader: society name under the mark */
 .preloader-name { max-width: 86vw; text-align: center; font-size: clamp(13px, 3.4vw, 16px); letter-spacing: .06em; color: var(--ink-66); }
+
+/* notice placement: clear of the header when it sits above the headline ... */
+.notice { margin-top: clamp(28px, 4vw, 56px); }
+/* ... and docked in the empty lower-left of the hero on wide screens */
+@media (min-width: 1500px) {
+  .notice {
+    position: absolute; left: calc(50% - 50vw + max(5vw, 56px)); bottom: 210px; margin: 0; width: 392px; max-width: 392px;
+    align-items: stretch; text-align: left;
+  }
+  .notice-org { justify-content: flex-start; }
+  .notice-body { justify-content: space-between; }
+  .notice-text { align-items: flex-start; }
+  .notice-title { justify-content: flex-start; }
+}
