@@ -66,7 +66,7 @@ create policy site_settings_admin on public.site_settings for all to authenticat
 
 insert into public.site_settings (key, value) values
   ('contact_email', ''),
-  ('proposer_name', 'Mithra Yohan Fernando'),
+  ('proposer_name', 'Yohan Mithra Fernando'),
   ('proposer_email', 'mithrayohan@gmail.com'),
   ('proposer_phone', '0716345560'),
   ('facebook_url', ''),
@@ -160,4 +160,4 @@ grant execute on function public.get_site_events(), public.get_site_settings(), 
 -- 3. Turn OFF public sign-ups: Authentication -> Sign In / Providers -> "Allow new users to sign up".
 
 -- If the site already has the old proposer name, update it:
---      update public.site_settings set value = 'Mithra Yohan Fernando' where key = 'proposer_name';
+--      update public.site_settings set value = 'Yohan Mithra Fernando' where key = 'proposer_name';

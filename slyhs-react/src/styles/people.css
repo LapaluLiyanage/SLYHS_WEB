@@ -35,3 +35,4 @@
   .contact-actions .btn { flex: 1 1 100%; justify-content: center; }
 }
 .contact-actions .btn { padding: 13px 24px; width: auto; height: auto; min-width: 0; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; }
+.contact-affil { margin: -6px 0 0; font-size: 14px; line-height: 1.5; color: var(--ink-66); }

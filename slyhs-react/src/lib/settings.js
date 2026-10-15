@@ -3,7 +3,7 @@ import { getSiteSettings } from './api';
 
 // shown until (or unless) the database answers; the admin panel changes these
 const DEFAULTS = {
-  contact_email: '', proposer_name: 'Mithra Yohan Fernando', proposer_email: 'mithrayohan@gmail.com', proposer_phone: '0716345560',
+  contact_email: '', proposer_name: 'Yohan Mithra Fernando', proposer_email: 'mithrayohan@gmail.com', proposer_phone: '0716345560',
   facebook_url: '', instagram_url: '', youtube_url: '', whatsapp_url: ''
 };
 let cache = null;
