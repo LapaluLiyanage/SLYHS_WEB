@@ -5,7 +5,7 @@ import {
 } from '../lib/adminApi';
 import '../styles/admin.css';
 import { POLICIES } from './policyData';
-import { SPECIES } from './speciesData';
+import { SPECIES, FP } from './speciesData';
 
 const TABS = [['overview', 'Overview'], ['events', 'Events'], ['settings', 'Site settings'], ['animals', 'Animals'], ['posts', 'Blog posts'], ['policies', 'Policies'], ['members', 'Members'], ['newsletter', 'Newsletter']];
 
@@ -380,6 +380,60 @@ function ImportBuiltins({ existing, onDone }) {
   );
 }
 
+/** Copies animal photos that live on other websites (Wikimedia Commons, the site's own files) into the database storage. */
+function SavePhotos({ rows, onDone }) {
+  const [msg, setMsg] = useState({ kind: 'ok', text: '' });
+  const [busy, setBusy] = useState(false);
+  const base = import.meta.env.VITE_SUPABASE_URL + '/storage/v1/object/public/animal-photos/';
+  const todo = rows.filter((a) => !(a.image_url || '').startsWith(base));
+  if (!todo.length) return null;
+
+  const wikiFile = async (sp) => {
+    if (sp.file) return sp.file;
+    if (!sp.wiki) return '';
+    const j = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + sp.wiki).then((r) => r.json());
+    const src = (j.originalimage && j.originalimage.source) || (j.thumbnail && j.thumbnail.source);
+    if (!src) return '';
+    const parts = src.split('?')[0].split('/');
+    return decodeURIComponent(src.includes('/thumb/') ? parts[parts.length - 2] : parts[parts.length - 1]);
+  };
+
+  const run = async () => {
+    setBusy(true);
+    let ok = 0;
+    const failed = [];
+    for (const a of todo) {
+      try {
+        const sp = SPECIES.find((x) => x.name === a.name) || {};
+        let from = a.image_url;
+        let credit = a.credit;
+        if (!from) {
+          const f = await wikiFile(sp);
+          if (!f) throw new Error('no photo found');
+          from = FP(f) + '?width=1400';
+          if (!credit) credit = 'Photo: Wikimedia Commons · https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(f.replace(/ /g, '_'));
+        }
+        const blob = await fetch(from).then((r) => { if (!r.ok) throw new Error('download failed'); return r.blob(); });
+        const type = blob.type === 'image/png' || blob.type === 'image/webp' ? blob.type : 'image/jpeg';
+        const url = await uploadPhoto(new File([blob], 'photo', { type }), a.id);
+        await upsert('animals', { ...a, image_url: url, credit, updated_at: new Date().toISOString() });
+        ok += 1;
+        setMsg({ kind: 'ok', text: `Saved ${ok} of ${todo.length}…` });
+      } catch (x) { failed.push(a.name + ' (' + x.message + ')'); }
+    }
+    setMsg({ kind: failed.length ? 'err' : 'ok', text: `Saved ${ok} photos to storage.` + (failed.length ? ' Not saved: ' + failed.join(', ') : '') });
+    setBusy(false);
+    onDone();
+  };
+  return (
+    <div className="adm-card adm-help">
+      <strong>Web photos ({todo.length} not in database storage yet)</strong>
+      <p className="adm-hint">Downloads each animal's photo from the website it comes from (Wikimedia Commons, or the site's own files), saves a copy in the database storage and points the animal to it. Animals with no photo get the lead photo of their Wikipedia article, credited to Wikimedia Commons with a link to the file page. Check each photo's licence there.</p>
+      <div className="adm-row"><button className="adm-btn adm-primary" onClick={run} disabled={busy}>{busy ? 'Saving…' : 'Save web photos to database'}</button><Msg kind={msg.kind}>{msg.text}</Msg></div>
+    </div>
+  );
+}
+
 function Animals() {
   const [st, reload] = useAsync(() => list('animals', '&order=sort_order.asc,name.asc'), []);
   const [extra, setExtra] = useState([]);
@@ -388,6 +442,7 @@ function Animals() {
     <>
       <div className="adm-head"><h2>Animals</h2><button className="adm-btn" onClick={() => setExtra((x) => [{ ...blankAnimal(), key: Date.now() }, ...x])}>+ Add animal</button></div>
       <ImportBuiltins existing={rows} onDone={reload} />
+      <SavePhotos rows={rows} onDone={reload} />
       <p className="adm-hint">Animals added here are shown after the built-in ones in the species guide on the home page, and on the Learn page when "Found only in Sri Lanka" is ticked. Visitors see changes the next time they open the site.</p>
       <Msg kind="err">{st.error}</Msg>
       {st.loading && <p className="adm-hint">Loading…</p>}
