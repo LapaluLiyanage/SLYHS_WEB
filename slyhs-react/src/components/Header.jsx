@@ -5,7 +5,7 @@ import { useSmooth } from '../lib/smooth';
 import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '../lib/gsap';
 import SmartLink from './SmartLink';
 
-const NAV_TARGETS = ['/#top', '/learn', '/#path', '/#why', '/#events', '/blog', '/#contact'];
+const NAV_TARGETS = ['/#top', '/learn', '/#path', '/#why', '/#events', '/blog', '/contact'];
 const LANGS = [['si', 'සිං'], ['ta', 'தமிழ்'], ['en', 'EN']];
 
 export default function Header() {

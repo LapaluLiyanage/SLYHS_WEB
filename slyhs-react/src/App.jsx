@@ -11,6 +11,7 @@ import Join from './pages/Join';
 import Learn from './pages/Learn';
 import Blog from './pages/Blog';
 import Policy from './pages/Policy';
+import Contact from './pages/Contact';
 
 const SerpentScene = lazy(() => import('./three/SerpentScene'));
 const Admin = lazy(() => import('./pages/Admin'));
@@ -20,6 +21,7 @@ const TITLES = {
   '/join': "Join SLYHS · Sri Lankan Young Herpetologists' Society",
   '/learn': "Learn · Sri Lanka's endemic herps · SLYHS",
   '/blog': 'Blog · SLYHS',
+  '/contact': 'Contact · SLYHS',
   '/privacy': 'Privacy Policy · SLYHS',
   '/ethics': 'Code of Ethics · SLYHS',
   '/safeguarding': 'Child Safeguarding · SLYHS'
@@ -76,6 +78,7 @@ function AnimatedRoutes() {
         <Route path="/learn/:species" element={<Learn />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:post" element={<Blog />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/:slug" element={<Policy />} />
         <Route path="*" element={<Home />} />
       </Routes>

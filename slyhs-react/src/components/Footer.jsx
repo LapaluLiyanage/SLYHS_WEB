@@ -74,6 +74,7 @@ export function Footer() {
             <SmartLink to="/#path">{t.navResearch}</SmartLink>
             <SmartLink to="/#why">{t.navConserve}</SmartLink>
             <SmartLink to="/blog">{t.navBlog}</SmartLink>
+            <SmartLink to="/contact">{t.nav[6]}</SmartLink>
             <SmartLink to="/join">{t.navJoin}</SmartLink>
           </div>
           <div className="footer-col footer-links">
