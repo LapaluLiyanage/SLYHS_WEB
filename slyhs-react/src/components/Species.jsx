@@ -219,7 +219,7 @@ export default function Species() {
                 <span className="sp-sci">{cur.sci}</span>
               </span>
               {cur.img
-                ? <span className="sp-credit">Photo: SLYHS · credit to be supplied</span>
+                ? <span className="sp-credit">{cur.credit || 'Photo: SLYHS · credit to be supplied'}</span>
                 : <a className="sp-credit" href={credit} target="_blank" rel="noopener noreferrer">Photo: Wikimedia Commons · author &amp; licence ↗</a>}
             </figcaption>
           </figure>

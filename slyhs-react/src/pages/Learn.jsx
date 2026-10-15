@@ -190,7 +190,7 @@ function SpeciesPage({ idx }) {
         <header className="spage-hero">
           <div className="spage-photo" role="img" aria-label={`${s.name} (${s.sci})`} style={img ? { backgroundImage: `url("${img}")`, backgroundPosition: s.pos } : undefined}>
             <span className="spage-count">{String(idx + 1).padStart(2, '0')} / {String(ENDEMIC.length).padStart(2, '0')}</span>
-            {!s.img && <span className="spage-credit">Photo: Wikimedia Commons</span>}
+            {s.credit ? <span className="spage-credit">{s.credit}</span> : !s.img && <span className="spage-credit">Photo: Wikimedia Commons</span>}
           </div>
           <div className="spage-title">
             <span className="sp-group">{s.group}</span>
