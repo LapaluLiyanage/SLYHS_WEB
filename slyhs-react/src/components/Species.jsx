@@ -36,8 +36,17 @@ export default function Species({ onOpenAid }) {
   const imgOf = (i, w) => SPECIES[i].img || (fileOf(i) ? FP(fileOf(i)) + '?width=' + w : '');
   const step = (d) => setSp(vis[(vpos + d + vis.length) % vis.length]);
 
-  // photos from Wikipedia for species without a bundled file
+  // photos from Wikipedia for species without a bundled file; fetched only once the section is near the screen
+  const [near, setNear] = useState(false);
   useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || !('IntersectionObserver' in window)) { setNear(true); return undefined; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); io.disconnect(); } }, { rootMargin: '900px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  useEffect(() => {
+    if (!near) return undefined;
     let dead = false;
     SPECIES.forEach((s, i) => {
       fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + s.wiki).then((r) => r.json()).then((j) => {
@@ -49,7 +58,7 @@ export default function Species({ onOpenAid }) {
       }).catch(() => {});
     });
     return () => { dead = true; };
-  }, []);
+  }, [near]);
 
   useEffect(() => {
     const onResize = () => setWide(window.innerWidth >= 900);
