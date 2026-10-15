@@ -211,7 +211,7 @@ function Register() {
                   <Chips {...fieldProps('prefLang')} multi label="Preferred language(s) *" hint="Pick all that apply" options={OPTS.prefLang} />
                   {v.isMinor && (
                     <div className="alert alert-info">
-                      <strong>You'll join as an Explorer.</strong> Because you're under 18, we'll ask a parent or guardian to confirm in step 4. Explorers take part in supervised activities and never handle wildlife.
+                      <strong>You'll join as {v.isJunior ? 'a Junior Explorer' : 'an Explorer'}.</strong> Because you're under 18, we'll ask a parent or guardian to confirm in step 4. {v.isJunior ? 'Junior Explorers (ages 7 to 14) take part with a parent or teacher present' : 'Explorers take part in supervised activities'} and never handle wildlife.
                     </div>
                   )}
                 </fieldset>

@@ -22,7 +22,7 @@ export const BLANK = {
   ethics: false, wildlife: false, privacy: false, directory: false, newsletter: true, whatsapp: false, captcha: ''
 };
 export const TIERS = [
-  { n: '01', name: 'Explorer', tag: 'Start here', kind: 'start', who: 'Ages 15 to 17, or complete beginners', can: 'Talks, workshops, supervised field walks, photo records' },
+  { n: '01', name: 'Explorer', tag: 'Start here', kind: 'start', who: 'Students aged 7 to 17, or complete beginners', can: 'Talks, workshops, supervised field walks, photo records. Ages 7 to 14 join as Junior Explorers with a parent or teacher present' },
   { n: '02', name: 'Member', tag: 'Start here', kind: 'start', who: '18 or over, basic course completed', can: 'Surveys, data work, support at rescues under supervision' },
   { n: '03', name: 'Rescuer', tag: 'Earned', kind: 'earned', who: 'Certified, 6 months active, mentor sign-off', can: 'Lead rescues of non-venomous snakes and other reptiles' },
   { n: '04', name: 'Specialist', tag: 'Earned', kind: 'earned', who: 'Endorsed by a recognised expert', can: 'Venomous snake rescue, training, leading surveys' },
@@ -45,15 +45,16 @@ export function ageOf(dob) {
 
 export function derive(d) {
   const age = ageOf(d.dob);
-  const isMinor = age !== null && age >= 15 && age < 18;
+  const isMinor = age !== null && age >= 7 && age < 18;
+  const isJunior = age !== null && age >= 7 && age < 15;
   let tier = 'Member';
   let tierNote = 'Surveys, data work and supervised rescue support once you complete the basic course.';
   if (isMinor || d.experience === 'Complete beginner') {
-    tier = 'Explorer';
-    tierNote = isMinor ? 'Under-18 members are placed in Explorer automatically. Supervised activities only.' : 'Talks, workshops, supervised field walks and photo records.';
+    tier = isJunior ? 'Junior Explorer' : 'Explorer';
+    tierNote = isJunior ? 'Students aged 7 to 14 join as Junior Explorers: school-friendly talks, workshops and walks, always with a parent or teacher present.' : isMinor ? 'Under-18 members are placed in Explorer automatically. Supervised activities only.' : 'Talks, workshops, supervised field walks and photo records.';
   }
   if (!isMinor && d.joiningAs === 'Mentor') { tier = 'Mentor'; tierNote = 'Pending committee review. We’ll be in touch.'; }
-  return { isMinor, tier, tierNote, showOrg: /student|professional/i.test(d.status), showFunding: d.joiningAs !== 'Member' };
+  return { isMinor, isJunior, tier, tierNote, showOrg: /student|professional/i.test(d.status), showFunding: d.joiningAs !== 'Member' };
 }
 
 export function validate(step, d) {
@@ -64,7 +65,7 @@ export function validate(step, d) {
     const a = ageOf(d.dob);
     if (!d.dob) e.dob = 'Please enter your date of birth.';
     else if (a === null || a > 100) e.dob = 'Please check this date.';
-    else if (a < 15) e.dob = 'Members must be 15 or older. Ask a teacher about our school outreach.';
+    else if (a < 7) e.dob = 'Members must be 7 or older. Ask a teacher about our school outreach.';
     if (!d.email) e.email = 'Please enter your email.';
     else if (!EMAIL_RE.test(d.email)) e.email = 'This email looks incomplete, e.g. name@example.com';
     if (d.phone.replace(/\D/g, '').length < 11) e.phone = 'Enter your number with the country code, e.g. +94 77 123 4567';
