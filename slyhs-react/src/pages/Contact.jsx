@@ -1,5 +1,5 @@
 import { useLang } from '../lib/i18n';
-import { useSiteSettings, safeEmail, safePhone, safeUrl } from '../lib/settings';
+import { useSiteSettings, safeEmail, safePhone, safeUrl, formatPhone, phoneHref } from '../lib/settings';
 import SmartLink from '../components/SmartLink';
 import { Footer } from '../components/Footer';
 
@@ -30,11 +30,11 @@ export default function Contact() {
             <h2>{site.proposer_name}</h2>
             <p className="contact-affil">{c.affil}</p>
             <dl>
-              {phone && <><dt>{c.phone}</dt><dd><a href={'tel:' + phone.replace(/[^\d+]/g, '')}>{phone}</a></dd></>}
+              {phone && <><dt>{c.phone}</dt><dd><a href={phoneHref(phone)}>{formatPhone(phone)}</a></dd></>}
               {mail && <><dt>{c.mail}</dt><dd><a href={'mailto:' + mail}>{mail}</a></dd></>}
             </dl>
             <div className="contact-actions">
-              {phone && <a className="btn btn-primary" href={'tel:' + phone.replace(/[^\d+]/g, '')}>{c.call} →</a>}
+              {phone && <a className="btn btn-primary" href={phoneHref(phone)}>{c.call} →</a>}
               {mail && <a className="btn btn-outline" href={'mailto:' + mail}>{c.email}</a>}
               {wa && <a className="btn btn-outline" href={wa} target="_blank" rel="noopener noreferrer">{c.whatsapp} ↗</a>}
             </div>

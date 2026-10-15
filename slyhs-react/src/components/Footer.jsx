@@ -3,7 +3,7 @@ import { useLang } from '../lib/i18n';
 import { gsap, prefersReducedMotion } from '../lib/gsap';
 import SmartLink from './SmartLink';
 import { subscribeNewsletter } from '../lib/api';
-import { useSiteSettings, safeUrl, safeEmail, safePhone } from '../lib/settings';
+import { useSiteSettings, safeUrl, safeEmail, safePhone, formatPhone, phoneHref } from '../lib/settings';
 
 /** Email signup, saved to the database. Used in the footer and on the blog's coming-soon page. */
 export function NewsletterForm() {
@@ -60,7 +60,7 @@ export function Footer() {
             <p><strong>{t.society}.</strong> {t.footAbout}</p>
             {contact && <a href={'mailto:' + contact}>{contact}</a>}
             {(site.proposer_name || proposerEmail || proposerPhone) && (
-              <p className="footer-proposer">{t.proposer}: <strong>{site.proposer_name}</strong>{proposerPhone && <><br />{t.phoneLabel}: <a href={'tel:' + proposerPhone.replace(/[^\d+]/g, '')}>{proposerPhone}</a></>}{proposerEmail && <><br /><a href={'mailto:' + proposerEmail}>{proposerEmail}</a></>}</p>
+              <p className="footer-proposer">{t.proposer}: <strong>{site.proposer_name}</strong>{proposerPhone && <><br />{t.phoneLabel}: <a href={phoneHref(proposerPhone)}>{formatPhone(proposerPhone)}</a></>}{proposerEmail && <><br /><a href={'mailto:' + proposerEmail}>{proposerEmail}</a></>}</p>
             )}
           </div>
           <div className="footer-col">
