@@ -397,6 +397,7 @@ img { display: block; max-width: 100%; }
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid rgba(220, 255, 180, .1); padding: 64px 5vw 36px; font-size: 14px; color: var(--ink-66); font-weight: 300; }
 .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 36px; }
+@media (min-width: 1000px) { .footer-grid { grid-template-columns: 1.3fr 1.5fr 1fr 1fr; } }
 .footer-col { display: flex; flex-direction: column; gap: 14px; }
 .footer-col p { margin: 0; line-height: 1.6; }
 .footer-brand { color: var(--ink); }
@@ -407,10 +408,10 @@ img { display: block; max-width: 100%; }
 .socials { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
 .newsletter { display: flex; flex-direction: column; gap: 8px; }
 .newsletter label { font-size: 13px; }
-.nl-field { display: flex; gap: 6px; padding: 5px; border-radius: 999px; border-color: rgba(220, 255, 180, .18); background: rgba(255, 255, 255, .03); }
-.nl-field input { flex: 1; min-width: 0; height: 44px; padding: 0 14px; border: 0; background: transparent; color: var(--ink); font-size: 15px; outline-offset: 0; }
+.nl-field { display: flex; flex-wrap: wrap; gap: 6px; padding: 5px; border-radius: 28px; border-color: rgba(220, 255, 180, .18); background: rgba(255, 255, 255, .03); }
+.nl-field input { flex: 1 1 170px; min-width: 0; height: 44px; padding: 0 14px; border: 0; background: transparent; color: var(--ink); font-size: 15px; outline-offset: 0; }
 .nl-field input::placeholder { color: rgba(238, 242, 234, .4); }
-.nl-field button { height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--lime); color: var(--on-lime); font-weight: 600; font-size: 14px; cursor: pointer; transition: box-shadow .3s; }
+.nl-field button { flex: 1 1 auto; height: 44px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--lime); color: var(--on-lime); font-weight: 600; font-size: 14px; cursor: pointer; transition: box-shadow .3s; }
 .nl-field button:hover { box-shadow: 0 0 24px rgba(201, 238, 110, .5); }
 .nl-status { color: var(--lime-2); }
 .footer-bottom { border-top: 1px solid rgba(220, 255, 180, .1); padding-top: 24px; display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; font-size: 12.5px; color: var(--ink-50); }

@@ -8,6 +8,7 @@ import Hero from '../components/Hero';
 import Split from '../components/Split';
 import SmartLink from '../components/SmartLink';
 import { SlimFooter } from '../components/Footer';
+import { useSiteSettings, safeEmail } from '../lib/settings';
 import { Field, TextInput, Select, DatePicker, Chips, Check } from '../components/FormBits';
 import {
   BLANK, OPTS, MULTI, DISTRICTS, STATUSES, TIERS, PERKS, DRAFT_KEY,
@@ -31,6 +32,8 @@ function loadDraft() {
 
 function Register() {
   const { t } = useLang();
+  const site = useSiteSettings();
+  const committeeMail = safeEmail(site.contact_email) || safeEmail(site.proposer_email);
   const { scrollTo } = useSmooth();
   const [initial] = useState(loadDraft);
   const [data, setData] = useState(initial.data);
@@ -269,9 +272,9 @@ function Register() {
                     </div>
                   )}
                   <span className="group-label">Required</span>
-                  <Check name="ethics" checked={data.ethics} onChange={set} error={errors.ethics}>I have read and agree to the <a href="#">Code of Ethics</a>.</Check>
+                  <Check name="ethics" checked={data.ethics} onChange={set} error={errors.ethics}>I have read and agree to the <SmartLink to="/ethics">Code of Ethics</SmartLink>.</Check>
                   <Check name="wildlife" checked={data.wildlife} onChange={set} error={errors.wildlife}>I understand I must not handle, collect, keep or trade wildlife unless I am trained, certified and permitted.</Check>
-                  <Check name="privacy" checked={data.privacy} onChange={set} error={errors.privacy}>I agree to the <a href="#">Privacy Policy</a>.</Check>
+                  <Check name="privacy" checked={data.privacy} onChange={set} error={errors.privacy}>I agree to the <SmartLink to="/privacy">Privacy Policy</SmartLink>.</Check>
                   <span className="group-label">Optional</span>
                   <Check name="directory" checked={data.directory} onChange={set}>Include me in the member directory (name, district and interests only).</Check>
                   <Check name="newsletter" checked={data.newsletter} onChange={set}>Send me the monthly newsletter.</Check>
@@ -295,7 +298,7 @@ function Register() {
                   <strong>{data.email} is already registered.</strong> If that's you, you're already a member. Check your inbox for the welcome email.
                   <span className="alert-actions">
                     <button type="button" className="btn btn-outline btn-inline" onClick={() => { setStatus('editing'); goTo(1, { email: 'Use a different email, or contact us if this one is yours.' }); }}>Use a different email</button>
-                    <a href="#">Contact the committee</a>
+                    {committeeMail && <a href={'mailto:' + committeeMail}>Contact the committee</a>}
                   </span>
                 </div>
               )}
@@ -324,9 +327,9 @@ function Register() {
             </div>
             <strong className="next-title">Next steps</strong>
             <ol className="next-steps">
-              <li><span>01</span><a href="#">Join your district WhatsApp group</a></li>
+              <li><span>01</span>We will add you to your district WhatsApp group</li>
               <li><span>02</span><SmartLink to="/#events">Attend the first online meeting</SmartLink></li>
-              <li><span>03</span><a href="#">Read the Code of Ethics</a></li>
+              <li><span>03</span><SmartLink to="/ethics">Read the Code of Ethics</SmartLink></li>
             </ol>
             <button type="button" className="btn btn-ghost glass" onClick={share}>Share with a friend</button>
             {shareMsg && <span className="share-msg" role="status">{shareMsg}</span>}

@@ -30,3 +30,9 @@ export async function subscribeNewsletter(email) {
   if (!res || !res.ok) throw new Error((res && res.error) || 'Subscribe failed');
   return res;
 }
+
+/** Events, settings and policy text edited in the admin panel; each resolves null if the database can't be reached. */
+export const getSiteEvents = () => rpc('get_site_events', {}).catch(() => null);
+export const getSiteSettings = () => rpc('get_site_settings', {}).catch(() => null);
+export const getPolicies = () => rpc('get_policies', {}).catch(() => null);
+export const getPosts = () => rpc('get_posts', {}).catch(() => null);

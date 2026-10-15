@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 /* UI strings from the SLYHS Home v2 + Join designs. */
 export const DICT = {
   en: {
-    nav: ['About', 'Learn', 'Research', 'Conserve & Rescue', 'Events', 'Contact'], join: 'Join the Society', learnMore: 'Learn more',
+    nav: ['About', 'Learn', 'Research', 'Conserve & Rescue', 'Events', 'Blog', 'Contact'], join: 'Join the Society', learnMore: 'Learn more',
     badgeNew: 'New', badge: 'First online meeting · Nov 2026',
     h1a: "Sri Lanka's young herpetologists,", h1b: 'connected.',
     sub: "Study, protect and share the island's snakes, other reptiles and amphibians, together with researchers at home and around the world.",
@@ -16,7 +16,7 @@ export const DICT = {
     next: 'Continue', back: 'Back', submit: 'Submit registration', submitting: 'Submitting…', home: 'Home'
   },
   si: {
-    nav: ['අප ගැන', 'ඉගෙනගන්න', 'පර්යේෂණ', 'සංරක්ෂණය සහ බේරාගැනීම', 'සිදුවීම්', 'සම්බන්ධ වන්න'], join: 'සංගමයට එක්වන්න', learnMore: 'තව දැනගන්න',
+    nav: ['අප ගැන', 'ඉගෙනගන්න', 'පර්යේෂණ', 'සංරක්ෂණය සහ බේරාගැනීම', 'සිදුවීම්', 'බ්ලොග්', 'සම්බන්ධ වන්න'], join: 'සංගමයට එක්වන්න', learnMore: 'තව දැනගන්න',
     badgeNew: 'නව', badge: 'පළමු මාර්ගගත රැස්වීම · 2026 නොවැ.',
     h1a: 'ශ්‍රී ලංකාවේ තරුණ උරග විද්‍යාඥයින්,', h1b: 'එක්ව.',
     sub: 'දිවයිනේ සර්පයින්, උරගයින් සහ උභයජීවීන් දේශීය හා ලොව පුරා පර්යේෂකයින් සමඟ අධ්‍යයනය කරමු, ආරක්ෂා කරමු, බෙදාගනිමු.',
@@ -29,7 +29,7 @@ export const DICT = {
     next: 'ඉදිරියට', back: 'ආපසු', submit: 'ලියාපදිංචිය යොමු කරන්න', submitting: 'යොමු කරමින්…', home: 'මුල් පිටුව'
   },
   ta: {
-    nav: ['எங்களைப் பற்றி', 'கற்க', 'ஆய்வு', 'பாதுகாப்பு & மீட்பு', 'நிகழ்வுகள்', 'தொடர்பு'], join: 'சங்கத்தில் சேருங்கள்', learnMore: 'மேலும் அறிக',
+    nav: ['எங்களைப் பற்றி', 'கற்க', 'ஆய்வு', 'பாதுகாப்பு & மீட்பு', 'நிகழ்வுகள்', 'வலைப்பதிவு', 'தொடர்பு'], join: 'சங்கத்தில் சேருங்கள்', learnMore: 'மேலும் அறிக',
     badgeNew: 'புதியது', badge: 'முதல் இணையக் கூட்டம் · நவ. 2026',
     h1a: 'இலங்கையின் இளம் ஊர்வனவியலாளர்கள்,', h1b: 'இணைந்து.',
     sub: 'தீவின் பாம்புகள், ஊர்வன மற்றும் நீர்நில வாழ்வனவற்றை உள்நாட்டு மற்றும் உலக ஆய்வாளர்களுடன் ஆய்வு செய்வோம், பாதுகாப்போம், பகிர்வோம்.',

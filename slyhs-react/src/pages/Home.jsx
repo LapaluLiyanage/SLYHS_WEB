@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/i18n';
 import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '../lib/gsap';
 import usePageFX from '../lib/usePageFX';
@@ -7,6 +7,10 @@ import { serpentState } from '../three/serpentState';
 import Hero from '../components/Hero';
 import Split from '../components/Split';
 import SmartLink from '../components/SmartLink';
+import { useEvents, useNow, timeLeft, sectionLink, eventsNote } from './events';
+import Species from '../components/Species';
+import AidModal from '../components/AidModal';
+import { useSmooth } from '../lib/smooth';
 import { Footer } from '../components/Footer';
 
 const DISTRICTS = ['Colombo', 'Kandy', 'Jaffna', 'Batticaloa'];
@@ -15,9 +19,9 @@ const BARS = ['Curious', 'Contributor', 'Researcher', 'Author', 'Pro'].map((labe
 }));
 const PARTNERS = ['Partner', 'University', 'Mentor network', 'Partner', 'Partner'];
 const STATS = [
-  { num: 116, text: 'recognised amphibian species live in Sri Lanka. About 90% are found nowhere else on Earth.', source: 'AmphibiaWeb' },
-  { num: 72, text: 'of those amphibian species are threatened with extinction.', source: 'IUCN Red List' },
-  { num: 100, suffix: '+', text: 'snake species share the island, but only about five can cause a fatal bite.', source: 'Reptile Database' }
+  { num: 116, text: 'recognised amphibian species live in Sri Lanka. About 90% are found nowhere else on Earth.', source: 'AmphibiaWeb', url: 'https://amphibiaweb.org' },
+  { num: 72, text: 'of those amphibian species are threatened with extinction.', source: 'IUCN Red List', url: 'https://www.iucnredlist.org' },
+  { num: 100, suffix: '+', text: 'snake species share the island, but only about five can cause a fatal bite.', source: 'Reptile Database', url: 'https://reptile-database.reptarium.cz' }
 ];
 const PATH = [
   { name: 'Curious', text: 'Attend talks, workshops and supervised field walks.' },
@@ -26,21 +30,35 @@ const PATH = [
   { name: 'Author', text: 'Publish a note, paper or newsletter feature.' },
   { name: 'Professional', text: 'Lead surveys, teach and mentor the next cohort.' }
 ];
-const EVENTS = [
-  { month: 'Nov 2026 · date TBC', tag: 'First meeting', featured: true, title: 'First online meeting: name the society, meet the committee', time: '7:00 pm (SLST)', where: 'Online · Zoom', lang: 'Sinhala, Tamil, English' },
-  { month: 'Dec 2026 · date TBC', tag: 'Herp Talk', title: 'Herp Talk: frogs of the wet zone', time: '7:30 pm (SLST)', where: 'Online · YouTube Live', lang: 'English, Sinhala captions' },
-  { month: 'Jan 2027 · date TBC', tag: 'Field walk', title: 'Reading a habitat safely: an Explorer field walk', time: '6:30 am', where: 'Venue to be announced', lang: 'Sinhala, Tamil' }
-];
 const PINGS = [
   { left: 'calc(50% - 104px)', top: '44%' }, { left: 'calc(50% + 66px)', top: '12%' },
   { left: 'calc(50% + 74px)', bottom: '14%' }, { left: 'calc(50% - 70px)', bottom: '8%' }
 ];
+
+function Countdown({ date, now }) {
+  const l = timeLeft(date, now);
+  if (!l) return <span className="event-count is-live">Starting now</span>;
+  return (
+    <div className="event-count" role="timer" aria-label="Time until this event">
+      {[['d', l.d], ['h', l.h], ['m', l.m], ['s', l.s]].map(([k, v]) => <span key={k}><b>{String(v).padStart(2, '0')}</b>{k}</span>)}
+    </div>
+  );
+}
 
 export default function Home() {
   const { t, lang } = useLang();
   const scope = useRef(null);
   const firstLang = useRef(true);
   usePageFX(scope);
+  const { scrollTo } = useSmooth();
+  const [aidOpen, setAidOpen] = useState(false);
+  const events = useEvents();
+  const now = useNow(1000);
+  const nextEvent = events.find((e) => e.status === 'scheduled');
+  const left = nextEvent && timeLeft(nextEvent.date, now);
+  const evLink = sectionLink(events);
+  const closeAid = useCallback(() => setAidOpen(false), []);
+  const identify = useCallback(() => { setAidOpen(false); setTimeout(() => scrollTo('#species'), 60); }, [scrollTo]);
 
   /* ---------------- page motion ---------------- */
   useGSAP(() => {
@@ -197,7 +215,8 @@ export default function Home() {
           <SmartLink to="#events" className="badge glass">
             <span className="badge-dot" />
             <span className="badge-new">{t.badgeNew}</span>
-            <span>{t.badge}</span>
+            <span>{nextEvent ? `${nextEvent.title.split(':')[0]} · ${nextEvent.month}` : t.badge}</span>
+            {left && <span className="badge-timer" aria-label="Time until the next meeting">{left.d}d {String(left.h).padStart(2, '0')}h {String(left.m).padStart(2, '0')}m {String(left.s).padStart(2, '0')}s</span>}
             <span className="badge-chev" aria-hidden="true">›</span>
           </SmartLink>
           <h1 className="hero-title" key={lang}>
@@ -262,7 +281,7 @@ export default function Home() {
         <div role="note" className="safety glass" data-reveal>
           <strong>{t.safetyLabel}</strong>
           <span>Keep your distance, keep children and pets away, and call the rescue hotline. Never try to catch or kill it. Snakebite: keep still and go to the nearest hospital immediately.</span>
-          <a href="#">First-aid guide →</a>
+          <button type="button" className="safety-aid" onClick={() => setAidOpen(true)}>First-aid guide →</button>
         </div>
       </div>
 
@@ -277,12 +296,14 @@ export default function Home() {
               <div className="stat glass-card" key={s.source}>
                 <span className="stat-num" data-count={s.num} data-suffix={s.suffix || ''}>{s.num}{s.suffix}</span>
                 <p>{s.text}</p>
-                <a href="#">Source: {s.source} ↗</a>
+                <a href={s.url} target="_blank" rel="noopener noreferrer">Source: {s.source} ↗</a>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      <Species onOpenAid={() => setAidOpen(true)} />
 
       <section id="path" className="section section-tight-top section-path" data-screen-label="Your path">
         <div className="container stack-48">
@@ -312,22 +333,28 @@ export default function Home() {
               <span className="eyebrow">{t.eventsTitle}</span>
               <h2 className="h2 h2-sm split"><Split parts={['Meet the', { text: 'society.', serif: true }]} /></h2>
             </div>
-            <a href="#" className="link-arrow">All events →</a>
+            {evLink.external
+              ? <a href={evLink.to} className="link-arrow" target="_blank" rel="noopener noreferrer">{evLink.label}</a>
+              : <SmartLink to={evLink.to} className="link-arrow">{evLink.label}</SmartLink>}
           </div>
           <div className="events">
-            {EVENTS.map((e) => (
+            {events.map((e) => (
               <article className={'event glass-card' + (e.featured ? ' is-featured' : '')} key={e.title}>
                 <div className="event-top"><span className="event-month">{e.month}</span><span className="tag">{e.tag}</span></div>
+                {e.status === 'scheduled' && <Countdown date={e.date} now={now} />}
                 <h3>{e.title}</h3>
                 <dl>
                   <dt>Time</dt><dd>{e.time}</dd>
                   <dt>Where</dt><dd>{e.where}</dd>
                   <dt>Language</dt><dd>{e.lang}</dd>
                 </dl>
-                <a href="#" className="btn btn-outline">Register interest</a>
+                {e.external
+                  ? <a href={e.to} className="btn btn-outline" target="_blank" rel="noopener noreferrer">{e.cta}</a>
+                  : <SmartLink to={e.to} className="btn btn-outline">{e.cta}</SmartLink>}
               </article>
             ))}
           </div>
+          <p className="events-note">{eventsNote(events)}</p>
         </div>
       </section>
 
@@ -342,6 +369,7 @@ export default function Home() {
       </section>
 
       <Footer />
+      <AidModal open={aidOpen} onClose={closeAid} onIdentify={identify} />
     </main>
   );
 }
