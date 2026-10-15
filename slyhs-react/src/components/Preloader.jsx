@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap, prefersReducedMotion } from '../lib/gsap';
 
 const KEY = 'slyhs-preloaded';
-const MIN_MS = 1500;   // long enough to watch the snake coil, short enough not to annoy
-const MAX_MS = 5000;   // never hold the site hostage if something is slow
+const MIN_MS = 3600;   // long enough to watch the snake coil and read the society name
+const MAX_MS = 8000;   // never hold the site hostage if something is slow
 
 const seen = () => { try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; } };
 
@@ -90,6 +90,7 @@ export default function Preloader() {
         </g>
       </svg>
       <span className="preloader-mark">SLYHS</span>
+      <span className="preloader-name">Sri Lankan Young Herpetologists' Society</span>
       <span className="preloader-sub">Waking the herps…</span>
     </div>
   );

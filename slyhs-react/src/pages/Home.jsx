@@ -35,11 +35,11 @@ const PINGS = [
   { left: 'calc(50% + 74px)', bottom: '14%' }, { left: 'calc(50% - 70px)', bottom: '8%' }
 ];
 
-function Countdown({ date, now }) {
+function Countdown({ date, now, label }) {
   const l = timeLeft(date, now);
   if (!l) return <span className="event-count is-live">Starting now</span>;
   return (
-    <div className="event-count" role="timer" aria-label="Time until this event">
+    <div className="event-count" role="timer" aria-label={label}>
       {[['d', l.d], ['h', l.h], ['m', l.m], ['s', l.s]].map(([k, v]) => <span key={k}><b>{String(v).padStart(2, '0')}</b>{k}</span>)}
     </div>
   );
@@ -55,8 +55,11 @@ export default function Home() {
   const events = useEvents();
   const now = useNow(1000);
   const nextEvent = events.find((e) => e.status === 'scheduled');
+  // the notice above the headline: the next dated event, else the first meeting / first listed event (all from the database, fetched once)
+  const spot = nextEvent || events.find((e) => e.featured) || events[0];
+  const spotTitle = !spot ? t.firstMeeting : spot.id === 'first-meeting' ? t.firstMeeting : spot.title.split(':')[0];
   const left = nextEvent && timeLeft(nextEvent.date, now);
-  const evLink = sectionLink(events);
+  const evLink = sectionLink(events, lang);
   const closeAid = useCallback(() => setAidOpen(false), []);
   const identify = useCallback(() => { setAidOpen(false); setTimeout(() => scrollTo('#species'), 60); }, [scrollTo]);
 
@@ -212,12 +215,21 @@ export default function Home() {
       <Hero label="Hero">
         <span className="sr-only">Sri Lankan green pit viper resting in a loose coil</span>
         <div className="hero-inner">
-          <SmartLink to="#events" className="badge glass">
-            <span className="badge-dot" />
-            <span className="badge-new">{t.badgeNew}</span>
-            <span>{nextEvent ? `${nextEvent.title.split(':')[0]} · ${nextEvent.month}` : t.badge}</span>
-            {left && <span className="badge-timer" aria-label="Time until the next meeting">{left.d}d {String(left.h).padStart(2, '0')}h {String(left.m).padStart(2, '0')}m {String(left.s).padStart(2, '0')}s</span>}
-            <span className="badge-chev" aria-hidden="true">›</span>
+          <SmartLink to="#events" className="notice glass">
+            <span className="notice-org"><span className="badge-dot" />{t.society}</span>
+            <span className="notice-body">
+              <span className="notice-text">
+                <span className="notice-title"><span className="badge-new">{t.badgeNew}</span>{spotTitle}</span>
+                <span className="notice-when">{spot ? (spot.status === 'tbd' ? t.soon : `${spot.month} · ${spot.time}`) : t.badge}</span>
+              </span>
+              {left
+                ? (
+                  <span className="notice-count" role="timer" aria-label={t.startsIn}>
+                    {[['d', left.d], ['h', left.h], ['m', left.m], ['s', left.s]].map(([k, v]) => <span key={k}><b>{String(v).padStart(2, '0')}</b>{k}</span>)}
+                  </span>
+                )
+                : <span className="notice-cta">{t.noticeCta} <span aria-hidden="true">›</span></span>}
+            </span>
           </SmartLink>
           <h1 className="hero-title" key={lang}>
             <Split parts={[t.h1a, { text: t.h1b, serif: true, grad: true }]} />
@@ -234,8 +246,8 @@ export default function Home() {
 
         <div id="what" className="pillars">
           <article className="pillar glass-card" data-tilt>
-            <div className="pillar-head"><span className="pillar-num">01</span><h3>Connect</h3></div>
-            <p>Meet enthusiasts in every district and researchers across Sri Lanka and the world.</p>
+            <div className="pillar-head"><span className="pillar-num">01</span><h3>{t.pillars[0][0]}</h3></div>
+            <p>{t.pillars[0][1]}</p>
             <div className="viz-connect">
               <div className="districts">
                 {DISTRICTS.map((d) => <div className="district" key={d}><span className="chip">{d}</span><span className="dots" /></div>)}
@@ -244,8 +256,8 @@ export default function Home() {
             </div>
           </article>
           <article className="pillar glass-card" data-tilt>
-            <div className="pillar-head"><span className="pillar-num">02</span><h3>Learn &amp; research</h3></div>
-            <p>Grow from curious to published, with a mentor, open papers and seed grants.</p>
+            <div className="pillar-head"><span className="pillar-num">02</span><h3>{t.pillars[1][0]}</h3></div>
+            <p>{t.pillars[1][1]}</p>
             <div className="viz-bars">
               {BARS.map((b) => (
                 <div className="bar-col" key={b.label}>
@@ -253,12 +265,12 @@ export default function Home() {
                   <span>{b.label}</span>
                 </div>
               ))}
-              <span className="your-path glass">↑ Your path</span>
+              <span className="your-path glass">{t.yourPath}</span>
             </div>
           </article>
           <article className="pillar glass-card" data-tilt>
-            <div className="pillar-head"><span className="pillar-num">03</span><h3>Conserve &amp; rescue</h3></div>
-            <p>Join surveys and train for safe, supervised rescue. Animals first, always.</p>
+            <div className="pillar-head"><span className="pillar-num">03</span><h3>{t.pillars[2][0]}</h3></div>
+            <p>{t.pillars[2][1]}</p>
             <div className="viz-radar">
               <span className="ring r1" /><span className="ring r2" /><span className="ring r3" />
               <span className="sweep" /><span className="core" />
@@ -280,8 +292,8 @@ export default function Home() {
       <div className="safety-wrap">
         <div role="note" className="safety glass" data-reveal>
           <strong>{t.safetyLabel}</strong>
-          <span>Keep your distance, keep children and pets away, and call the rescue hotline. Never try to catch or kill it. Snakebite: keep still and go to the nearest hospital immediately.</span>
-          <button type="button" className="safety-aid" onClick={() => setAidOpen(true)}>First-aid guide →</button>
+          <span>{t.safetyText}</span>
+          <button type="button" className="safety-aid" onClick={() => setAidOpen(true)}>{t.aidBtn}</button>
         </div>
       </div>
 
@@ -289,27 +301,27 @@ export default function Home() {
         <div className="container stack-56">
           <div className="section-head center">
             <span className="eyebrow">{t.whyTitle}</span>
-            <h2 className="h2 split"><Split parts={['An island of species found', { text: 'nowhere else.', serif: true }]} /></h2>
+            <h2 className="h2 split"><Split key={lang} parts={[t.whyH[0], { text: t.whyH[1], serif: true }]} /></h2>
           </div>
           <div className="stats">
-            {STATS.map((s) => (
+            {STATS.map((s, i) => (
               <div className="stat glass-card" key={s.source}>
                 <span className="stat-num" data-count={s.num} data-suffix={s.suffix || ''}>{s.num}{s.suffix}</span>
-                <p>{s.text}</p>
-                <a href={s.url} target="_blank" rel="noopener noreferrer">Source: {s.source} ↗</a>
+                <p>{t.statsText[i]}</p>
+                <a href={s.url} target="_blank" rel="noopener noreferrer">{t.source}: {s.source} ↗</a>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <Species onOpenAid={() => setAidOpen(true)} />
+      <Species />
 
       <section id="path" className="section section-tight-top section-path" data-screen-label="Your path">
         <div className="container stack-48">
           <div className="section-head center">
             <span className="eyebrow">{t.pathTitle}</span>
-            <h2 className="h2 split"><Split parts={['From first sighting to', { text: 'first paper.', serif: true }]} /></h2>
+            <h2 className="h2 split"><Split key={lang} parts={[t.pathH[0], { text: t.pathH[1], serif: true }]} /></h2>
           </div>
           <div className="path-wrap">
             <div className="path-line" aria-hidden="true"><span /></div>
@@ -317,8 +329,8 @@ export default function Home() {
               {PATH.map((s, i) => (
                 <li className="step glass-card" key={s.name}>
                   <span className={'step-n' + (i === 4 ? ' is-final' : '')}>{i + 1}</span>
-                  <h3>{s.name}</h3>
-                  <p>{s.text}</p>
+                  <h3>{t.steps5[i][0]}</h3>
+                  <p>{t.steps5[i][1]}</p>
                 </li>
               ))}
             </ol>
@@ -331,7 +343,7 @@ export default function Home() {
           <div className="events-head">
             <div className="section-head">
               <span className="eyebrow">{t.eventsTitle}</span>
-              <h2 className="h2 h2-sm split"><Split parts={['Meet the', { text: 'society.', serif: true }]} /></h2>
+              <h2 className="h2 h2-sm split"><Split key={lang} parts={[t.eventsH[0], { text: t.eventsH[1], serif: true }]} /></h2>
             </div>
             {evLink.external
               ? <a href={evLink.to} className="link-arrow" target="_blank" rel="noopener noreferrer">{evLink.label}</a>
@@ -341,12 +353,12 @@ export default function Home() {
             {events.map((e) => (
               <article className={'event glass-card' + (e.featured ? ' is-featured' : '')} key={e.title}>
                 <div className="event-top"><span className="event-month">{e.month}</span><span className="tag">{e.tag}</span></div>
-                {e.status === 'scheduled' && <Countdown date={e.date} now={now} />}
+                {e.status === 'scheduled' && <Countdown date={e.date} now={now} label={t.startsIn} />}
                 <h3>{e.title}</h3>
                 <dl>
-                  <dt>Time</dt><dd>{e.time}</dd>
-                  <dt>Where</dt><dd>{e.where}</dd>
-                  <dt>Language</dt><dd>{e.lang}</dd>
+                  <dt>{t.evTime}</dt><dd>{e.time}</dd>
+                  <dt>{t.evWhere}</dt><dd>{e.where}</dd>
+                  <dt>{t.evLang}</dt><dd>{e.lang}</dd>
                 </dl>
                 {e.external
                   ? <a href={e.to} className="btn btn-outline" target="_blank" rel="noopener noreferrer">{e.cta}</a>
@@ -354,7 +366,7 @@ export default function Home() {
               </article>
             ))}
           </div>
-          <p className="events-note">{eventsNote(events)}</p>
+          <p className="events-note">{eventsNote(events, lang)}</p>
         </div>
       </section>
 
@@ -362,8 +374,8 @@ export default function Home() {
         <div className="join-band">
           <div className="join-media" aria-hidden="true"><img src="/assets/hero-snake.jpg" alt="" /></div>
           <div className="join-scrim" aria-hidden="true" />
-          <span className="join-kicker">No annual fee at the start</span>
-          <h2 className="h2 split"><Split parts={['Start as an Explorer. Grow into a', { text: 'rescuer, researcher or mentor.', serif: true }]} /></h2>
+          <span className="join-kicker">{t.noFee}</span>
+          <h2 className="h2 split"><Split key={lang} parts={[t.joinBandH[0], { text: t.joinBandH[1], serif: true }]} /></h2>
           <SmartLink to="/join#register" className="btn btn-primary btn-lg magnetic"><span>{t.startReg}</span> <span aria-hidden="true">→</span></SmartLink>
         </div>
       </section>

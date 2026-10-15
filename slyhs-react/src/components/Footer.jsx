@@ -3,7 +3,7 @@ import { useLang } from '../lib/i18n';
 import { gsap, prefersReducedMotion } from '../lib/gsap';
 import SmartLink from './SmartLink';
 import { subscribeNewsletter } from '../lib/api';
-import { useSiteSettings, safeUrl, safeEmail } from '../lib/settings';
+import { useSiteSettings, safeUrl, safeEmail, safePhone } from '../lib/settings';
 
 /** Email signup, saved to the database. Used in the footer and on the blog's coming-soon page. */
 export function NewsletterForm() {
@@ -34,12 +34,12 @@ export function NewsletterForm() {
   if (subscribed) return <span role="status" className="nl-status">{t.subscribed}{email}</span>;
   return (
     <form className="newsletter" onSubmit={onSubmit}>
-      <label htmlFor={id}>Email address</label>
+      <label htmlFor={id}>{t.emailLabel}</label>
       <div className="nl-field glass">
         <input id={id} type="email" required placeholder="you@example.com" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <button type="submit" disabled={sending}>{t.subscribe}</button>
       </div>
-      {failed && <span className="nl-error" role="alert">Couldn't subscribe just now. Check your connection and try again.</span>}
+      {failed && <span className="nl-error" role="alert">{t.nlError}</span>}
     </form>
   );
 }
@@ -50,16 +50,17 @@ export function Footer() {
   const socials = [['Facebook', site.facebook_url], ['Instagram', site.instagram_url], ['YouTube', site.youtube_url], ['WhatsApp', site.whatsapp_url]].filter(([, u]) => safeUrl(u));
   const contact = safeEmail(site.contact_email);
   const proposerEmail = safeEmail(site.proposer_email);
+  const proposerPhone = safePhone(site.proposer_phone);
   return (
     <footer id="contact" className="site-footer">
       <div className="container stack-48">
         <div className="footer-grid">
           <div className="footer-col">
             <span className="brand-short footer-brand">SLYHS</span>
-            <p>Sri Lankan Young Herpetologists' Society. Study, protect and share Sri Lanka's reptiles and amphibians.</p>
+            <p><strong>{t.society}.</strong> {t.footAbout}</p>
             {contact && <a href={'mailto:' + contact}>{contact}</a>}
-            {(site.proposer_name || proposerEmail) && (
-              <p className="footer-proposer">Proposer of the society: <strong>{site.proposer_name}</strong>{proposerEmail && <><br /><a href={'mailto:' + proposerEmail}>{proposerEmail}</a></>}</p>
+            {(site.proposer_name || proposerEmail || proposerPhone) && (
+              <p className="footer-proposer">{t.proposer}: <strong>{site.proposer_name}</strong>{proposerPhone && <><br />{t.phoneLabel}: <a href={'tel:' + proposerPhone.replace(/[^\d+]/g, '')}>{proposerPhone}</a></>}{proposerEmail && <><br /><a href={'mailto:' + proposerEmail}>{proposerEmail}</a></>}</p>
             )}
           </div>
           <div className="footer-col">
@@ -67,23 +68,23 @@ export function Footer() {
             <NewsletterForm />
           </div>
           <div className="footer-col footer-links">
-            <span className="footer-title">Explore</span>
-            <SmartLink to="/#top">About</SmartLink>
-            <SmartLink to="/learn">Learn</SmartLink>
-            <SmartLink to="/#path">Research</SmartLink>
-            <SmartLink to="/#why">Conserve &amp; rescue</SmartLink>
-            <SmartLink to="/blog">Blog</SmartLink>
-            <SmartLink to="/join">Join</SmartLink>
+            <span className="footer-title">{t.explore}</span>
+            <SmartLink to="/#top">{t.navAbout}</SmartLink>
+            <SmartLink to="/learn">{t.navLearn}</SmartLink>
+            <SmartLink to="/#path">{t.navResearch}</SmartLink>
+            <SmartLink to="/#why">{t.navConserve}</SmartLink>
+            <SmartLink to="/blog">{t.navBlog}</SmartLink>
+            <SmartLink to="/join">{t.navJoin}</SmartLink>
           </div>
           <div className="footer-col footer-links">
-            <span className="footer-title">Policies</span>
-            <SmartLink to="/privacy">Privacy Policy</SmartLink><SmartLink to="/ethics">Code of Ethics</SmartLink><SmartLink to="/safeguarding">Child Safeguarding</SmartLink>
+            <span className="footer-title">{t.policies}</span>
+            <SmartLink to="/privacy">{t.privacy}</SmartLink><SmartLink to="/ethics">{t.ethics}</SmartLink><SmartLink to="/safeguarding">{t.safeguarding}</SmartLink>
             {socials.length > 0 && <div className="socials">{socials.map(([n, u]) => <a key={n} href={safeUrl(u)} target="_blank" rel="noopener noreferrer">{n}</a>)}</div>}
           </div>
         </div>
         <div className="footer-bottom">
-          <span>All wildlife photos are used with credit and consent. We do not share locations of rare species.</span>
-          <span>Hero image: illustrative, credit to be supplied.</span>
+          <span>{t.footNote1}</span>
+          <span>{t.footNote2}</span>
         </div>
       </div>
     </footer>
@@ -95,9 +96,9 @@ export function SlimFooter() {
   return (
     <footer className="site-footer site-footer-slim">
       <div className="container footer-bottom">
-        <span>All wildlife photos are used with credit and consent. We do not share locations of rare species.</span>
+        <span>{t.footNote1}</span>
         <span className="footer-links-inline">
-          <SmartLink to="/">{t.home}</SmartLink><SmartLink to="/privacy">Privacy Policy</SmartLink><SmartLink to="/ethics">Code of Ethics</SmartLink><SmartLink to="/safeguarding">Child Safeguarding</SmartLink>
+          <SmartLink to="/">{t.home}</SmartLink><SmartLink to="/privacy">{t.privacy}</SmartLink><SmartLink to="/ethics">{t.ethics}</SmartLink><SmartLink to="/safeguarding">{t.safeguarding}</SmartLink>
         </span>
       </div>
     </footer>

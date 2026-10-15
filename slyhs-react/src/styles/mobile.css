@@ -86,3 +86,31 @@ html { -webkit-tap-highlight-color: transparent; }
   .hero-title { font-size: clamp(38px, 11.5vw, 44px); }
   .brand-short { letter-spacing: .14em; }
 }
+
+/* phones, second pass */
+@media (max-width: 760px) {
+  .notice { align-self: stretch; max-width: none; border-radius: 20px; }
+  .notice-body { gap: 12px; }
+  .notice-count { width: 100%; }
+  .notice-count span { flex: 1; min-width: 0; }
+  .notice-title { flex-wrap: wrap; }
+  .hero-title { font-size: clamp(36px, 10.4vw, 52px); overflow-wrap: anywhere; }
+  .hero-sub { font-size: 16px; }
+  .h2 { overflow-wrap: anywhere; }
+  .safety { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .safety span { min-width: 0; }
+  .safety .safety-aid { width: 100%; padding: 13px 18px; }
+  .event-count { flex-wrap: wrap; }
+  .event-count span { flex: 1; min-width: 56px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+  .footer-bottom { flex-direction: column; gap: 8px; }
+  .footer-proposer, .footer-col a { overflow-wrap: anywhere; }
+  .footer-col a { display: inline-block; padding: 4px 0; }
+  .nl-field { flex-wrap: nowrap; }
+  img, svg, video { max-width: 100%; }
+}
+@media (max-width: 380px) {
+  .notice-count b { font-size: 15px; }
+  .notice { padding: 11px 12px; }
+  .stat-num { font-size: 56px; }
+}

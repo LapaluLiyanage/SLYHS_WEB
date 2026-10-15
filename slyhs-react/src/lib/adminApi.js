@@ -19,6 +19,30 @@ export const configured = () => Boolean(URL && KEY);
 export const hasSession = () => Boolean(session && session.access_token);
 export const sessionEmail = () => (session && session.email) || '';
 
+const SETPW = 'slyhs-admin-setpw';
+export const needsPassword = () => { try { return sessionStorage.getItem(SETPW) === '1'; } catch { return false; } };
+export const passwordDone = () => { try { sessionStorage.removeItem(SETPW); } catch { /* private mode */ } };
+
+/** An invite / password-reset email lands on the site with #access_token=… : keep that session and open the admin page to set a password. */
+export function adoptEmailLink() {
+  const h = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const token = h.get('access_token');
+  if (!token || !['invite', 'recovery', 'magiclink'].includes(h.get('type'))) return false;
+  let email = '';
+  try { email = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).email || ''; } catch { /* unreadable token */ }
+  save({ access_token: token, refresh_token: h.get('refresh_token'), expires_at: Date.now() + (Number(h.get('expires_in')) || 3600) * 1000, email });
+  try { sessionStorage.setItem(SETPW, '1'); } catch { /* private mode */ }
+  window.history.replaceState(null, '', '/admin');
+  return true;
+}
+
+export async function setPassword(password) {
+  const token = await freshToken();
+  const res = await fetch(`${URL}/auth/v1/user`, { method: 'PUT', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: `Bearer ${token}` }, body: JSON.stringify({ password }) });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(j.msg || j.error_description || 'Could not set the password');
+}
+
 async function auth(path, body) {
   const res = await fetch(`${URL}/auth/v1/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY }, body: JSON.stringify(body) });
   const j = await res.json().catch(() => ({}));

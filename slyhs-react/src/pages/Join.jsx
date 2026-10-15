@@ -410,7 +410,7 @@ export default function Join() {
           </ul>
           <div className="hero-ctas">
             <SmartLink to="#register" className="btn btn-primary btn-lg magnetic"><span>{t.startReg}</span> <span aria-hidden="true">↓</span></SmartLink>
-            <SmartLink to="#tiers" className="btn btn-ghost btn-lg glass magnetic">Membership tiers</SmartLink>
+            <SmartLink to="#tiers" className="btn btn-ghost btn-lg glass magnetic">{t.tiersLabel}</SmartLink>
           </div>
         </div>
       </Hero>
@@ -418,8 +418,8 @@ export default function Join() {
       <section id="tiers" className="section" data-screen-label="Membership tiers">
         <div className="container stack-56">
           <div className="section-head center">
-            <span className="eyebrow">Membership tiers</span>
-            <h2 className="h2 split"><Split parts={['Everyone starts somewhere. Levels are', { text: 'earned, not bought.', serif: true }]} /></h2>
+            <span className="eyebrow">{t.tiersLabel}</span>
+            <h2 className="h2 split"><Split key={lang} parts={[t.tiersH[0], { text: t.tiersH[1], serif: true }]} /></h2>
           </div>
           <ol className="tiers">
             {TIERS.map((tr, i) => (
@@ -431,7 +431,7 @@ export default function Join() {
             ))}
           </ol>
           <p className="tiers-note glass" data-reveal>
-            Everyone starts as an Explorer or Member. Rescuer and Specialist levels are earned through training and mentor approval. <strong>Members under 18 never handle wildlife.</strong>
+            {t.tiersNote} <strong>{t.tiersBold}</strong>
           </p>
         </div>
       </section>

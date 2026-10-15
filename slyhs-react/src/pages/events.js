@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSiteEvents } from '../lib/api';
+import { useLang } from '../lib/i18n';
 
 // Events shown in "Meet the society". The committee edits them in the admin panel (table `events`,
 // see supabase/admin_setup.sql); the list below is only the fallback shown if the database
@@ -8,9 +9,23 @@ import { getSiteEvents } from '../lib/api';
 //   no date      -> "Coming soon" / "Idea"
 //   future date  -> the date and time (Sri Lanka time), and a "Join the meeting" button
 //   past date    -> marked "Past event"
-const TBD = 'Decided with our first members';
-const WHERE_TBD = 'To be announced';
 const JOIN = '/join#register';
+
+// words the cards add around the database text, per language
+const W = {
+  en: { tbd: 'Decided with our first members', whereTbd: 'To be announced', soon: 'Coming soon', idea: 'Idea', past: 'past event', sutra: '(SLST)', interest: 'Register interest', help: 'Join to help plan', next: 'Join for the next one', meet: 'Join the meeting',
+    linkJoin: 'Join the first meeting →', linkReg: 'Register for the first meeting →', linkShape: 'Join to shape our events →',
+    noteSched: 'The first meeting is scheduled. The other events are ideas we are still planning. Have a suggestion? Tell us when you join.',
+    noteTbd: 'The first meeting date will be set once members have joined. The other events are ideas we are still planning. Have a suggestion? Tell us when you join.' },
+  si: { tbd: 'අපගේ පළමු සාමාජිකයින් සමඟ තීරණය කෙරේ', whereTbd: 'පසුව දැනුම් දෙනු ලැබේ', soon: 'ඉක්මනින්', idea: 'අදහසක්', past: 'අවසන් සිදුවීම', sutra: '(ශ්‍රී ලංකා වේලාව)', interest: 'උනන්දුව ලියාපදිංචි කරන්න', help: 'සැලසුම් කිරීමට එක්වන්න', next: 'ඊළඟ එකට එක්වන්න', meet: 'රැස්වීමට එක්වන්න',
+    linkJoin: 'පළමු රැස්වීමට එක්වන්න →', linkReg: 'පළමු රැස්වීමට ලියාපදිංචි වන්න →', linkShape: 'අපගේ සිදුවීම් හැඩගැස්වීමට එක්වන්න →',
+    noteSched: 'පළමු රැස්වීම නියමිතයි. අනෙක් සිදුවීම් අප තවමත් සැලසුම් කරන අදහස් ය. යෝජනාවක් තිබේද? එක්වන විට අපට කියන්න.',
+    noteTbd: 'සාමාජිකයින් එක්වූ පසු පළමු රැස්වීමේ දිනය නියම කෙරේ. අනෙක් සිදුවීම් අප තවමත් සැලසුම් කරන අදහස් ය. යෝජනාවක් තිබේද? එක්වන විට අපට කියන්න.' },
+  ta: { tbd: 'எங்கள் முதல் உறுப்பினர்களுடன் முடிவு செய்யப்படும்', whereTbd: 'பின்னர் அறிவிக்கப்படும்', soon: 'விரைவில்', idea: 'யோசனை', past: 'முடிந்த நிகழ்வு', sutra: '(இலங்கை நேரம்)', interest: 'ஆர்வத்தைப் பதிவு செய்க', help: 'திட்டமிட உதவ இணையுங்கள்', next: 'அடுத்ததற்கு இணையுங்கள்', meet: 'கூட்டத்தில் இணையுங்கள்',
+    linkJoin: 'முதல் கூட்டத்தில் இணையுங்கள் →', linkReg: 'முதல் கூட்டத்திற்குப் பதிவு செய்க →', linkShape: 'எங்கள் நிகழ்வுகளை வடிவமைக்க இணையுங்கள் →',
+    noteSched: 'முதல் கூட்டம் திட்டமிடப்பட்டுள்ளது. மற்ற நிகழ்வுகள் இன்னும் திட்டமிடப்படும் யோசனைகள். ஆலோசனை உண்டா? சேரும்போது எங்களிடம் கூறுங்கள்.',
+    noteTbd: 'உறுப்பினர்கள் இணைந்த பிறகு முதல் கூட்டத்தின் தேதி நிர்ணயிக்கப்படும். மற்ற நிகழ்வுகள் இன்னும் திட்டமிடப்படும் யோசனைகள். ஆலோசனை உண்டா? சேரும்போது எங்களிடம் கூறுங்கள்.' }
+};
 
 export const EVENTS = [
   { id: 'first-meeting', tag: 'First meeting', featured: true, title: 'First online meeting: name the society, meet the committee', where: 'Online', lang: '', date: '', link: '' },
@@ -18,7 +33,8 @@ export const EVENTS = [
   { id: 'field-walk', tag: 'Suggestion', title: 'Reading a habitat safely: an Explorer field walk', where: '', lang: '', date: '', link: '' }
 ];
 
-const fmt = (d, o) => new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Colombo', ...o }).format(d);
+const LOCALE = { en: 'en-GB', si: 'si-LK', ta: 'ta-LK' };
+const fmt = (d, o, l = 'en') => new Intl.DateTimeFormat(LOCALE[l] || 'en-GB', { timeZone: 'Asia/Colombo', ...o }).format(d);
 
 /** Only https links are ever used as a button target. */
 const safeLink = (l) => (typeof l === 'string' && /^https:\/\//i.test(l) ? l : '');
@@ -29,29 +45,32 @@ export function mergeRemote(list, remote) {
   return remote.map((r) => ({ id: r.id, tag: r.tag, title: r.title, featured: !!r.featured, where: r.where, lang: r.lang, date: r.date || '', link: safeLink(r.link) }));
 }
 
-export function resolveEvent(e, now = new Date()) {
-  const base = { ...e, where: e.where || WHERE_TBD, lang: e.lang || TBD };
+export function resolveEvent(e, now = new Date(), l = 'en') {
+  const w = W[l] || W.en;
+  const base = { ...e, where: e.where || w.whereTbd, lang: e.lang || w.tbd };
   const when = e.date ? new Date(e.date) : null;
   if (!when || Number.isNaN(when.getTime())) {
-    return { ...base, status: 'tbd', month: e.featured ? 'Coming soon' : 'Idea', time: TBD, cta: e.featured ? 'Register interest' : 'Join to help plan', to: JOIN };
+    return { ...base, status: 'tbd', month: e.featured ? w.soon : w.idea, time: w.tbd, cta: e.featured ? w.interest : w.help, to: JOIN };
   }
-  const month = fmt(when, { day: 'numeric', month: 'short', year: 'numeric' });
-  const time = fmt(when, { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s?(am|pm)/i, (_, p) => ' ' + p.toLowerCase()) + ' (SLST)';
-  if (when.getTime() + 3 * 3600e3 < now.getTime()) return { ...base, status: 'past', month: month + ' · past event', time, cta: 'Join for the next one', to: JOIN };
-  return { ...base, status: 'scheduled', month, time, cta: safeLink(e.link) ? 'Join the meeting' : 'Register interest', to: safeLink(e.link) || JOIN, external: !!safeLink(e.link) };
+  const month = fmt(when, { day: 'numeric', month: 'short', year: 'numeric' }, l);
+  const time = fmt(when, { hour: 'numeric', minute: '2-digit', hour12: true }, l).replace(/\s?(am|pm)/i, (_, p) => ' ' + p.toLowerCase()) + ' ' + w.sutra;
+  if (when.getTime() + 3 * 3600e3 < now.getTime()) return { ...base, status: 'past', month: month + ' · ' + w.past, time, cta: w.next, to: JOIN };
+  return { ...base, status: 'scheduled', month, time, cta: safeLink(e.link) ? w.meet : w.interest, to: safeLink(e.link) || JOIN, external: !!safeLink(e.link) };
 }
 
 /** The link beside the section heading follows the first meeting's state. */
-export function sectionLink(list) {
+export function sectionLink(list, l = 'en') {
+  const w = W[l] || W.en;
   const first = list.find((e) => e.featured);
-  if (first && first.status === 'scheduled') return { label: first.external ? 'Join the first meeting →' : 'Register for the first meeting →', to: first.to, external: first.external };
-  return { label: 'Join to shape our events →', to: JOIN };
+  if (first && first.status === 'scheduled') return { label: first.external ? w.linkJoin : w.linkReg, to: first.to, external: first.external };
+  return { label: w.linkShape, to: JOIN };
 }
 
-export function eventsNote(list) {
+export function eventsNote(list, l = 'en') {
+  const w = W[l] || W.en;
   const first = list.find((e) => e.featured);
-  if (first && first.status === 'scheduled') return 'The first meeting is scheduled. The other events are ideas we are still planning. Have a suggestion? Tell us when you join.';
-  return 'The first meeting date will be set once members have joined. The other events are ideas we are still planning. Have a suggestion? Tell us when you join.';
+  if (first && first.status === 'scheduled') return w.noteSched;
+  return w.noteTbd;
 }
 
 /** Upcoming first (soonest first), then undated ideas, then past events (most recent first). */
@@ -72,7 +91,8 @@ export function useEvents() {
     return () => { dead = true; };
   }, []);
   const now = useNow(30000);
-  return sortEvents(mergeRemote(EVENTS, remote).map((e) => resolveEvent(e, now)));
+  const { lang } = useLang();
+  return sortEvents(mergeRemote(EVENTS, remote).map((e) => resolveEvent(e, now, lang)));
 }
 
 /** A Date that refreshes every `ms` milliseconds. */

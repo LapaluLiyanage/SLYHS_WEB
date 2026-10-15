@@ -2,14 +2,14 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { gsap, prefersReducedMotion } from '../lib/gsap';
 import Split from './Split';
 import SmartLink from './SmartLink';
-import { FP, SPECIES, KINDS, VEN, STATUS_C, AID_DO, AID_DONT } from '../pages/speciesData';
+import { FP, SPECIES, KINDS, VEN, STATUS_C } from '../pages/speciesData';
 
 const SLIDE_SECONDS = 6;
 const matchesVen = (s, v) => v === 'all' || (v === 'venomous') === !!s.venom;
 const matchesKind = (s, k) => k === 'All' || s.kind === k;
 
 /** "Meet the island's herps": filterable species rail + slideshow detail panel. */
-export default function Species({ onOpenAid }) {
+export default function Species() {
   const [sp, setSp] = useState(0);
   const [kind, setKind] = useState('All');
   const [ven, setVen] = useState('all');
@@ -266,19 +266,6 @@ export default function Species({ onOpenAid }) {
                   {look.rows.map(([a, b]) => <Fragment key={a}><span>{a}</span><span>{b}</span></Fragment>)}
                 </div>
                 <span className="sp-warn">If you are not sure, treat it as venomous.</span>
-              </div>
-            )}
-
-            {cur.venom && (
-              <div className="sp-box sp-bite" role="note">
-                <div className="sp-boxhead">
-                  <span className="sp-biteL"><span className="sp-label">If someone is bitten</span><button type="button" onClick={onOpenAid}>Full guide →</button></span>
-                  <a href="tel:1990" className="sp-call">Call 1990 · Suwa Seriya</a>
-                </div>
-                <div className="sp-dodont">
-                  <ul>{AID_DO.map((d) => <li key={d}><span className="y">✓</span>{d}</li>)}</ul>
-                  <ul>{AID_DONT.map((d) => <li key={d}><span className="n">✕</span>{d}</li>)}</ul>
-                </div>
               </div>
             )}
 

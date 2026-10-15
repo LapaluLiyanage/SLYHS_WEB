@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  configured, hasSession, sessionEmail, signIn, signOut, isAdmin, count, list, listNewest, upsert, remove,
+  configured, hasSession, needsPassword, passwordDone, setPassword, sessionEmail, signIn, signOut, isAdmin, count, list, listNewest, upsert, remove,
   toCsv, download, isoToSl, slToIso, sectionsToText, textToSections
 } from '../lib/adminApi';
 import '../styles/admin.css';
@@ -10,6 +10,7 @@ const TABS = [['overview', 'Overview'], ['events', 'Events'], ['settings', 'Site
 
 const SETTINGS = [
   ['proposer_name', 'Proposer name', 'text', 'Shown in the footer'],
+  ['proposer_phone', 'Proposer phone', 'tel', 'Shown in the footer (contact)'],
   ['proposer_email', 'Proposer email', 'email', 'Shown in the footer and used for "Contact the committee"'],
   ['contact_email', 'Society contact email', 'email', 'Leave empty to hide it. If set, it is shown in the footer and used for "Contact the committee"'],
   ['facebook_url', 'Facebook page', 'url', 'https://… (empty = link hidden)'],
@@ -56,6 +57,30 @@ function Login({ onDone }) {
         <Msg kind="err">{err}</Msg>
         <button className="ad-btn ad-primary" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
         <a href="/" className="ad-link">← Back to the website</a>
+      </form>
+    </div>
+  );
+}
+
+function SetPassword({ onDone }) {
+  const [pw, setPw] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const submit = async (e) => {
+    e.preventDefault();
+    if (pw.length < 8) return setErr('Use at least 8 characters.');
+    setBusy(true); setErr('');
+    try { await setPassword(pw); passwordDone(); onDone(); } catch (x) { setErr(x.message); } finally { setBusy(false); }
+  };
+  return (
+    <div className="ad-login">
+      <form onSubmit={submit} className="ad-card">
+        <span className="ad-brand">SLYHS</span>
+        <h1>Choose your password</h1>
+        <p className="ad-hint">{sessionEmail()} is confirmed. Pick a password to use for future sign-ins.</p>
+        <label>New password<input type="password" required minLength={8} autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} /></label>
+        <Msg kind="err">{err}</Msg>
+        <button className="ad-btn ad-primary" disabled={busy}>{busy ? 'Saving…' : 'Save and continue'}</button>
       </form>
     </div>
   );
@@ -358,7 +383,7 @@ function DataTable({ table, title, idCol, keyCols, csvName }) {
 
 /* ---------------------------------------------------------------- shell */
 export default function Admin() {
-  const [state, setState] = useState(hasSession() ? 'checking' : 'out');
+  const [state, setState] = useState(hasSession() ? (needsPassword() ? 'setpw' : 'checking') : 'out');
   const [tab, setTab] = useState('overview');
 
   useEffect(() => {
@@ -375,6 +400,7 @@ export default function Admin() {
 
   if (!configured()) return <div className="ad-login"><div className="ad-card"><h1>Database not configured</h1><p>Set VITE_SUPABASE_URL and VITE_SUPABASE_KEY (see .env.example).</p></div></div>;
   if (state === 'checking') return <div className="ad-login"><p className="ad-hint">Checking sign-in…</p></div>;
+  if (state === 'setpw') return <SetPassword onDone={() => setState('checking')} />;
   if (state === 'out') return <Login onDone={() => setState('in')} />;
 
   const out = async () => { await signOut(); setState('out'); };
