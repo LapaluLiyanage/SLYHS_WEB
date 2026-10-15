@@ -3,6 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import SmartLink from '../components/SmartLink';
 import AidModal from '../components/AidModal';
 import { Footer } from '../components/Footer';
+import useAnimals from '../lib/animals';
 import { SPECIES, STATUS_C, AID_DO, AID_DONT } from './speciesData';
 import useSpeciesPhotos, { speciesSlug } from '../lib/useSpeciesPhotos';
 import { PEOPLE } from './peopleData';
@@ -28,6 +29,11 @@ const WHY = [
 ];
 
 const ENDEMIC = SPECIES.filter((s) => s.endemic !== false);
+// animals added in the admin panel arrive after the first render: refill the list in place
+function useEndemic() {
+  useAnimals();
+  ENDEMIC.splice(0, ENDEMIC.length, ...SPECIES.filter((s) => s.endemic !== false));
+}
 const FILTERS = ['All', 'Snakes', 'Frogs', 'Lizards', 'Turtles'];
 
 /* ---------------------------------------------------------------- list page */
@@ -271,6 +277,7 @@ function SpeciesPage({ idx }) {
 
 export default function Learn() {
   const { species } = useParams();
+  useEndemic();
   if (!species) return <LearnHome />;
   const idx = ENDEMIC.findIndex((s) => speciesSlug(s.name) === species);
   return idx < 0 ? <Navigate to="/learn" replace /> : <SpeciesPage key={species} idx={idx} />;

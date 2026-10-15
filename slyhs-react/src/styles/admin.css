@@ -7,9 +7,9 @@
 
 .adm-card { padding: 22px; border-radius: 18px; background: linear-gradient(180deg, rgba(20, 28, 20, .55), rgba(8, 12, 9, .7)); border: 1px solid var(--line); margin-bottom: 16px; }
 .adm-card label, .adm-search { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(238, 242, 234, .75); }
-.adm-card input, .adm-card textarea, .adm-search { font: inherit; font-size: 14.5px; color: var(--ink); background: rgba(0, 0, 0, .35); border: 1px solid rgba(220, 255, 180, .2); border-radius: 10px; padding: 10px 12px; width: 100%; }
+.adm-card input, .adm-card select, .adm-card textarea, .adm-search { font: inherit; font-size: 14.5px; color: var(--ink); background: rgba(0, 0, 0, .35); border: 1px solid rgba(220, 255, 180, .2); border-radius: 10px; padding: 10px 12px; width: 100%; }
 .adm-card textarea { resize: vertical; line-height: 1.5; }
-.adm-card input:focus, .adm-card textarea:focus, .adm-search:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
+.adm-card input:focus, .adm-card select:focus, .adm-card textarea:focus, .adm-search:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
 .adm-card small { color: var(--ink-50); font-size: 12px; }
 .adm-search { max-width: 360px; margin: 6px 0 14px; }
 

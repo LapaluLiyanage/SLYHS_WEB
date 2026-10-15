@@ -13,7 +13,7 @@ export default function useSpeciesPhotos(list) {
   useEffect(() => {
     let dead = false;
     list.forEach((s) => {
-      if (s.img || s.file) return;
+      if (s.img || s.file || !s.wiki) return;
       fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + s.wiki).then((r) => r.json()).then((j) => {
         const src = (j.originalimage && j.originalimage.source) || (j.thumbnail && j.thumbnail.source);
         if (!src || dead) return;

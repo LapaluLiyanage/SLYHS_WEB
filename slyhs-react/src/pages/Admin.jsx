@@ -6,7 +6,7 @@ import {
 import '../styles/admin.css';
 import { POLICIES } from './policyData';
 
-const TABS = [['overview', 'Overview'], ['events', 'Events'], ['settings', 'Site settings'], ['posts', 'Blog posts'], ['policies', 'Policies'], ['members', 'Members'], ['newsletter', 'Newsletter']];
+const TABS = [['overview', 'Overview'], ['events', 'Events'], ['settings', 'Site settings'], ['animals', 'Animals'], ['posts', 'Blog posts'], ['policies', 'Policies'], ['members', 'Members'], ['newsletter', 'Newsletter']];
 
 const SETTINGS = [
   ['proposer_name', 'Proposer name', 'text', 'Shown in the footer'],
@@ -277,6 +277,79 @@ function Posts() {
   );
 }
 
+/* ---------------------------------------------------------------- animals */
+const KINDS = ['Snakes', 'Frogs', 'Lizards', 'Turtles'];
+const STATUSES = ['', 'Least Concern', 'Near Threatened', 'Vulnerable', 'Endangered'];
+const slugOf = (n) => n.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const blankAnimal = () => ({ id: '', name: '', sci: '', local_name: '', kind: 'Snakes', group_text: '', status: '', danger: '', endemic: true, size_label: '', image_url: '', description: '', facts: '', published: true, sort_order: 100, isNew: true });
+
+function AnimalCard({ animal, onSaved, onDeleted }) {
+  const [f, setF] = useState(animal);
+  const [msg, setMsg] = useState({ kind: 'ok', text: '' });
+  const set = (k) => (e) => setF((p) => ({ ...p, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+  const save = async () => {
+    const id = f.isNew ? slugOf(f.name) : f.id;
+    if (!f.name.trim() || !id) return setMsg({ kind: 'err', text: 'Give the animal a name.' });
+    if (!httpsOk(f.image_url.trim())) return setMsg({ kind: 'err', text: 'The photo link must start with https://' });
+    try {
+      await upsert('animals', {
+        id, name: f.name.trim(), sci: f.sci.trim(), local_name: f.local_name.trim(), kind: f.kind, group_text: f.group_text.trim(), status: f.status,
+        danger: f.danger, endemic: !!f.endemic, size_label: f.size_label.trim(), image_url: f.image_url.trim(), description: f.description.trim(), facts: f.facts.trim(),
+        published: !!f.published, sort_order: Number(f.sort_order) || 0, updated_at: new Date().toISOString()
+      });
+      setF((p) => ({ ...p, id, isNew: false }));
+      setMsg({ kind: 'ok', text: f.published ? 'Saved. It shows in the species guide and on the Learn page.' : 'Saved as hidden.' });
+      onSaved();
+    } catch (x) { setMsg({ kind: 'err', text: x.message }); }
+  };
+  const del = async () => {
+    if (!window.confirm(`Delete "${f.name || 'this animal'}"? This cannot be undone.`)) return;
+    try { if (!animal.isNew) await remove('animals', 'id', f.id); onDeleted(); } catch (x) { setMsg({ kind: 'err', text: x.message }); }
+  };
+  return (
+    <div className="adm-card">
+      <div className="adm-grid">
+        <label>Name<input value={f.name} onChange={set('name')} placeholder="Sri Lankan green pit viper" /></label>
+        <label>Scientific name<input value={f.sci} onChange={set('sci')} placeholder="Craspedocephalus trigonocephalus" /></label>
+        <label>Sinhala name<input value={f.local_name} onChange={set('local_name')} /></label>
+        <label>Group<select value={f.kind} onChange={set('kind')}>{KINDS.map((k) => <option key={k}>{k}</option>)}</select></label>
+        <label>Family line<input value={f.group_text} onChange={set('group_text')} placeholder="Snake · Viperidae · Pit vipers" /></label>
+        <label>Conservation status<select value={f.status} onChange={set('status')}>{STATUSES.map((k) => <option key={k} value={k}>{k || 'Not assessed / unknown'}</option>)}</select></label>
+        <label>Danger to people<select value={f.danger} onChange={set('danger')}><option value="">Not stated (frogs, lizards…)</option><option value="venomous">Venomous</option><option value="harmless">Harmless</option></select></label>
+        <label>Size<input value={f.size_label} onChange={set('size_label')} placeholder="up to 130 cm" /></label>
+        <label className="adm-wide">Photo link<input type="url" value={f.image_url} onChange={set('image_url')} placeholder="https://upload.wikimedia.org/…" /><small>https only. Use a photo you have permission to show, and credit it in the description.</small></label>
+        <label className="adm-wide">Description<textarea rows={4} value={f.description} onChange={set('description')} /></label>
+        <label className="adm-wide">Key facts<textarea rows={5} value={f.facts} onChange={set('facts')} placeholder={'Habitat: Wet-zone forest\nDiet: Frogs and lizards'} /><small>One fact per line as "Label: text".</small></label>
+        <label>Order<input type="number" value={f.sort_order} onChange={set('sort_order')} /></label>
+        <label className="adm-check"><input type="checkbox" checked={f.endemic} onChange={set('endemic')} /> Found only in Sri Lanka (shown on Learn)</label>
+        <label className="adm-check"><input type="checkbox" checked={f.published} onChange={set('published')} /> Show on the website</label>
+      </div>
+      <div className="adm-row">
+        <button className="adm-btn adm-primary" onClick={save}>Save</button>
+        <button className="adm-btn adm-danger" onClick={del}>Delete</button>
+        <Msg kind={msg.kind}>{msg.text}</Msg>
+      </div>
+    </div>
+  );
+}
+
+function Animals() {
+  const [st, reload] = useAsync(() => list('animals', '&order=sort_order.asc,name.asc'), []);
+  const [extra, setExtra] = useState([]);
+  const rows = st.data || [];
+  return (
+    <>
+      <div className="adm-head"><h2>Animals</h2><button className="adm-btn" onClick={() => setExtra((x) => [{ ...blankAnimal(), key: Date.now() }, ...x])}>+ Add animal</button></div>
+      <p className="adm-hint">Animals added here are shown after the built-in ones in the species guide on the home page, and on the Learn page when "Found only in Sri Lanka" is ticked. Visitors see changes the next time they open the site.</p>
+      <Msg kind="err">{st.error}</Msg>
+      {st.loading && <p className="adm-hint">Loading…</p>}
+      {extra.map((a) => <AnimalCard key={a.key} animal={a} onSaved={() => { setExtra((x) => x.filter((e) => e.key !== a.key)); reload(); }} onDeleted={() => setExtra((x) => x.filter((e) => e.key !== a.key))} />)}
+      {rows.map((a) => <AnimalCard key={a.id + a.updated_at} animal={a} onSaved={reload} onDeleted={reload} />)}
+      {!st.loading && !st.error && !rows.length && !extra.length && <p className="adm-hint">No animals added yet. The built-in species still show.</p>}
+    </>
+  );
+}
+
 /* ---------------------------------------------------------------- policies */
 function PolicyEditor({ slug, saved, onSaved }) {
   const base = POLICIES[slug];
@@ -417,6 +490,7 @@ export default function Admin() {
         {tab === 'overview' && <Overview go={setTab} />}
         {tab === 'events' && <Events />}
         {tab === 'settings' && <Settings />}
+        {tab === 'animals' && <Animals />}
         {tab === 'posts' && <Posts />}
         {tab === 'policies' && <Policies />}
         {tab === 'members' && <DataTable table="registrations" title="Members" idCol="id" csvName="slyhs-members" keyCols={['created_at', 'full_name', 'email', 'district', 'tier', 'phone', 'dob']} />}

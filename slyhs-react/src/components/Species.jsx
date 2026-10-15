@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { gsap, prefersReducedMotion } from '../lib/gsap';
 import Split from './Split';
 import SmartLink from './SmartLink';
+import useAnimals from '../lib/animals';
 import { FP, SPECIES, KINDS, VEN, STATUS_C } from '../pages/speciesData';
 
 const SLIDE_SECONDS = 6;
@@ -10,6 +11,7 @@ const matchesKind = (s, k) => k === 'All' || s.kind === k;
 
 /** "Meet the island's herps": filterable species rail + slideshow detail panel. */
 export default function Species() {
+  const animalsVer = useAnimals(); // animals added in the admin panel are appended to SPECIES
   const [sp, setSp] = useState(0);
   const [kind, setKind] = useState('All');
   const [ven, setVen] = useState('all');
@@ -27,7 +29,7 @@ export default function Species() {
   const vis = useMemo(
     () => KINDS.slice(1).flatMap((k) => SPECIES.map((s, i) => i).filter((i) => SPECIES[i].kind === k))
       .filter((i) => matchesKind(SPECIES[i], kind) && matchesVen(SPECIES[i], ven)),
-    [kind, ven]
+    [kind, ven, animalsVer]
   );
   const vpos = Math.max(0, vis.indexOf(sp));
   const cur = SPECIES[sp];
@@ -49,6 +51,7 @@ export default function Species() {
     if (!near) return undefined;
     let dead = false;
     SPECIES.forEach((s, i) => {
+      if (!s.wiki) return;
       fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + s.wiki).then((r) => r.json()).then((j) => {
         const src = (j.originalimage && j.originalimage.source) || (j.thumbnail && j.thumbnail.source);
         if (!src || dead) return;
