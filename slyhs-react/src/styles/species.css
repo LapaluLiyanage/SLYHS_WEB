@@ -333,3 +333,18 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   .notice-text { align-items: flex-start; }
   .notice-title { justify-content: flex-start; }
 }
+
+/* compact notice */
+.notice { gap: 7px; padding: 9px 12px 9px 13px; border-radius: 16px; max-width: min(100%, 400px); }
+.notice-org { gap: 7px; font-size: 9.5px; letter-spacing: .12em; }
+.notice-org .badge-dot { width: 5px; height: 5px; }
+.notice-body { gap: 8px 14px; padding-top: 7px; }
+.notice-text { gap: 2px; }
+.notice-title { gap: 7px; font-size: 13px; }
+.notice-when { font-size: 11.5px; }
+.notice .badge-new { font-size: 9px; padding: 1px 6px; }
+.notice-cta { font-size: 12px; }
+.notice-count { gap: 4px; }
+.notice-count span { min-width: 32px; padding: 3px 3px; font-size: 8px; border-radius: 8px; }
+.notice-count b { font-size: 14px; }
+@media (min-width: 1500px) { .notice { width: 300px; max-width: 300px; } }
