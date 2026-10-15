@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   configured, hasSession, needsPassword, passwordDone, setPassword, sessionEmail, signIn, signOut, isAdmin, count, list, listNewest, upsert, remove,
-  toCsv, download, isoToSl, slToIso, sectionsToText, textToSections
+  toCsv, download, isoToSl, slToIso, uploadPhoto, sectionsToText, textToSections
 } from '../lib/adminApi';
 import '../styles/admin.css';
 import { POLICIES } from './policyData';
+import { SPECIES } from './speciesData';
 
 const TABS = [['overview', 'Overview'], ['events', 'Events'], ['settings', 'Site settings'], ['animals', 'Animals'], ['posts', 'Blog posts'], ['policies', 'Policies'], ['members', 'Members'], ['newsletter', 'Newsletter']];
 
@@ -281,12 +282,24 @@ function Posts() {
 const KINDS = ['Snakes', 'Frogs', 'Lizards', 'Turtles'];
 const STATUSES = ['', 'Least Concern', 'Near Threatened', 'Vulnerable', 'Endangered'];
 const slugOf = (n) => n.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const blankAnimal = () => ({ id: '', name: '', sci: '', local_name: '', kind: 'Snakes', group_text: '', status: '', danger: '', endemic: true, size_label: '', image_url: '', description: '', facts: '', published: true, sort_order: 100, isNew: true });
+const blankAnimal = () => ({ id: '', name: '', sci: '', local_name: '', kind: 'Snakes', group_text: '', status: '', danger: '', endemic: true, size_label: '', image_url: '', credit: '', description: '', facts: '', published: true, sort_order: 100, isNew: true });
 
 function AnimalCard({ animal, onSaved, onDeleted }) {
   const [f, setF] = useState(animal);
   const [msg, setMsg] = useState({ kind: 'ok', text: '' });
   const set = (k) => (e) => setF((p) => ({ ...p, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+  const [busy, setBusy] = useState(false);
+  const pick = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    setBusy(true); setMsg({ kind: 'ok', text: 'Uploading…' });
+    try {
+      const url = await uploadPhoto(file, slugOf(f.name) || 'animal');
+      setF((p) => ({ ...p, image_url: url }));
+      setMsg({ kind: 'ok', text: 'Photo uploaded. Press Save to use it on the website.' });
+    } catch (x) { setMsg({ kind: 'err', text: x.message }); } finally { setBusy(false); }
+  };
   const save = async () => {
     const id = f.isNew ? slugOf(f.name) : f.id;
     if (!f.name.trim() || !id) return setMsg({ kind: 'err', text: 'Give the animal a name.' });
@@ -294,7 +307,7 @@ function AnimalCard({ animal, onSaved, onDeleted }) {
     try {
       await upsert('animals', {
         id, name: f.name.trim(), sci: f.sci.trim(), local_name: f.local_name.trim(), kind: f.kind, group_text: f.group_text.trim(), status: f.status,
-        danger: f.danger, endemic: !!f.endemic, size_label: f.size_label.trim(), image_url: f.image_url.trim(), description: f.description.trim(), facts: f.facts.trim(),
+        danger: f.danger, endemic: !!f.endemic, size_label: f.size_label.trim(), image_url: f.image_url.trim(), credit: f.credit.trim(), description: f.description.trim(), facts: f.facts.trim(),
         published: !!f.published, sort_order: Number(f.sort_order) || 0, updated_at: new Date().toISOString()
       });
       setF((p) => ({ ...p, id, isNew: false }));
@@ -317,7 +330,10 @@ function AnimalCard({ animal, onSaved, onDeleted }) {
         <label>Conservation status<select value={f.status} onChange={set('status')}>{STATUSES.map((k) => <option key={k} value={k}>{k || 'Not assessed / unknown'}</option>)}</select></label>
         <label>Danger to people<select value={f.danger} onChange={set('danger')}><option value="">Not stated (frogs, lizards…)</option><option value="venomous">Venomous</option><option value="harmless">Harmless</option></select></label>
         <label>Size<input value={f.size_label} onChange={set('size_label')} placeholder="up to 130 cm" /></label>
-        <label className="adm-wide">Photo link<input type="url" value={f.image_url} onChange={set('image_url')} placeholder="https://upload.wikimedia.org/…" /><small>https only. Use a photo you have permission to show, and credit it in the description.</small></label>
+        <label className="adm-wide">Photo<input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} disabled={busy} /><small>Upload a JPG, PNG or WebP up to 3 MB. It is stored in the database storage. Or paste a link below.</small></label>
+        {f.image_url && <div className="adm-wide adm-preview"><img src={f.image_url} alt="" /></div>}
+        <label className="adm-wide">Photo link<input type="url" value={f.image_url} onChange={set('image_url')} placeholder="https://…" /><small>https only. Filled in automatically after an upload.</small></label>
+        <label className="adm-wide">Photo credit<input value={f.credit} onChange={set('credit')} placeholder="Photo: Name, with permission" /><small>Shown under the picture. Only use photos you have permission to show.</small></label>
         <label className="adm-wide">Description<textarea rows={4} value={f.description} onChange={set('description')} /></label>
         <label className="adm-wide">Key facts<textarea rows={5} value={f.facts} onChange={set('facts')} placeholder={'Habitat: Wet-zone forest\nDiet: Frogs and lizards'} /><small>One fact per line as "Label: text".</small></label>
         <label>Order<input type="number" value={f.sort_order} onChange={set('sort_order')} /></label>
@@ -333,6 +349,37 @@ function AnimalCard({ animal, onSaved, onDeleted }) {
   );
 }
 
+const factsText = (facts) => (facts || []).map(([a, b]) => `${a}: ${b}`).join('\n');
+const absUrl = (u) => (u && u.startsWith('/') ? window.location.origin + u : u && /^https:\/\//i.test(u) ? u : '');
+
+/** Copies the built-in species into the database so their text, photo and credit can be edited here. */
+function ImportBuiltins({ existing, onDone }) {
+  const [msg, setMsg] = useState({ kind: 'ok', text: '' });
+  const [busy, setBusy] = useState(false);
+  const have = new Set(existing.map((a) => a.name));
+  const todo = SPECIES.filter((s) => !s.remote && !have.has(s.name));
+  if (!todo.length) return null;
+  const run = async () => {
+    setBusy(true);
+    try {
+      await upsert('animals', todo.map((s, i) => ({
+        id: slugOf(s.name), name: s.name, sci: s.sci || '', local_name: s.local || '', kind: s.kind, group_text: s.group || '', status: s.status || '',
+        danger: s.venom ? 'venomous' : s.harmless ? 'harmless' : '', endemic: s.endemic !== false, size_label: s.sizeLabel || '', image_url: absUrl(s.img),
+        credit: s.credit || '', description: s.desc || '', facts: factsText(s.facts), published: true, sort_order: i + 1, updated_at: new Date().toISOString()
+      })));
+      setMsg({ kind: 'ok', text: `Imported ${todo.length} animals. Edit them below.` });
+      onDone();
+    } catch (x) { setMsg({ kind: 'err', text: x.message }); } finally { setBusy(false); }
+  };
+  return (
+    <div className="adm-card adm-help">
+      <strong>Built-in species ({todo.length} not in the database yet)</strong>
+      <p className="adm-hint">Copy the species that came with the website into the database. You can then change their text, photo and credit here, or hide them. Their "Don't confuse with" comparisons stay as they are.</p>
+      <div className="adm-row"><button className="adm-btn adm-primary" onClick={run} disabled={busy}>{busy ? 'Importing…' : 'Import built-in species'}</button><Msg kind={msg.kind}>{msg.text}</Msg></div>
+    </div>
+  );
+}
+
 function Animals() {
   const [st, reload] = useAsync(() => list('animals', '&order=sort_order.asc,name.asc'), []);
   const [extra, setExtra] = useState([]);
@@ -340,6 +387,7 @@ function Animals() {
   return (
     <>
       <div className="adm-head"><h2>Animals</h2><button className="adm-btn" onClick={() => setExtra((x) => [{ ...blankAnimal(), key: Date.now() }, ...x])}>+ Add animal</button></div>
+      <ImportBuiltins existing={rows} onDone={reload} />
       <p className="adm-hint">Animals added here are shown after the built-in ones in the species guide on the home page, and on the Learn page when "Found only in Sri Lanka" is ticked. Visitors see changes the next time they open the site.</p>
       <Msg kind="err">{st.error}</Msg>
       {st.loading && <p className="adm-hint">Loading…</p>}

@@ -17,7 +17,7 @@ function toSpecies(r) {
   return {
     remote: true, name: r.name, sci: r.sci || '', local: r.local_name || '', kind: r.kind, group: r.group_text || r.kind,
     status: r.status || '', venom: r.danger === 'venomous', harmless: r.danger === 'harmless', endemic: r.endemic !== false,
-    sizeLabel: r.size_label || '', img: safeImg(r.image_url), desc: r.description || '', facts: parseFacts(r.facts), pos: '50% 50%'
+    sizeLabel: r.size_label || '', img: safeImg(r.image_url), credit: r.credit || '', desc: r.description || '', facts: parseFacts(r.facts), pos: '50% 50%'
   };
 }
 
@@ -27,7 +27,18 @@ const listeners = new Set();
 
 function merge(rows) {
   for (let i = SPECIES.length - 1; i >= 0; i -= 1) if (SPECIES[i].remote) SPECIES.splice(i, 1);
-  (rows || []).forEach((r) => { if (r && r.name && !SPECIES.some((s) => s.name === r.name)) SPECIES.push(toSpecies(r)); });
+  (rows || []).forEach((r) => {
+    if (!r || !r.name) return;
+    const base = SPECIES.find((s) => s.name === r.name && !s.remote);
+    if (!base) { SPECIES.push(toSpecies(r)); return; }
+    // a built-in animal edited in the admin panel: only filled-in fields replace the built-in ones
+    const n = toSpecies(r);
+    ['sci', 'local', 'group', 'status', 'sizeLabel', 'img', 'credit', 'desc'].forEach((k) => { if (n[k]) base[k] = n[k]; });
+    if (n.facts.length) base.facts = n.facts;
+    if (r.danger) { base.venom = n.venom; base.harmless = n.harmless; }
+    base.endemic = n.endemic;
+    if (n.img) base.file = '';
+  });
   version += 1;
   listeners.forEach((fn) => fn(version));
 }

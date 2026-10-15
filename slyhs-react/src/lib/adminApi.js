@@ -95,6 +95,18 @@ export async function isAdmin() {
   try { return (await call('is_admin', { method: 'POST', body: {}, rpc: true })).data === true; } catch { return false; }
 }
 
+/** Uploads a photo to the public `animal-photos` bucket (admins only) and returns its public https URL. */
+export async function uploadPhoto(file, name) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error('Use a JPG, PNG or WebP photo.');
+  if (file.size > 3 * 1024 * 1024) throw new Error('The photo is over 3 MB. Shrink it first.');
+  const token = await freshToken();
+  const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+  const path = `${name}-${Date.now().toString(36)}.${ext}`;
+  const res = await fetch(`${URL}/storage/v1/object/animal-photos/${path}`, { method: 'POST', headers: { apikey: KEY, Authorization: `Bearer ${token}`, 'Content-Type': file.type, 'x-upsert': 'false' }, body: file });
+  if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.message || 'Upload failed. Has animals.sql been run in Supabase?'); }
+  return `${URL}/storage/v1/object/public/animal-photos/${path}`;
+}
+
 export const count = async (table) => (await call(`${table}?select=*&limit=1`, { prefer: 'count=exact' })).count;
 export const list = async (table, query = '') => (await call(`${table}?select=*${query}`)).data || [];
 export const upsert = (table, row, key = 'id') => call(`${table}?on_conflict=${key}`, { method: 'POST', body: row, prefer: 'resolution=merge-duplicates,return=minimal' });
