@@ -205,3 +205,8 @@
 .footer-links-inline { display: flex; flex-wrap: wrap; gap: 18px; }
 .footer-links-inline a { color: inherit; }
 .footer-links-inline a:hover { color: var(--lime-2); }
+
+/* real <button> elements: browsers paint them white by default, which hid the label */
+button.btn { font-family: inherit; cursor: pointer; }
+button.btn-outline { background: transparent; color: var(--ink); }
+button.btn-outline:hover { background: rgba(201, 238, 110, .08); color: #fff; }
