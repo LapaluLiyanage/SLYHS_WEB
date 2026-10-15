@@ -42,7 +42,8 @@ export default function Contact() {
           <SmartLink to="/join" className="link-arrow">{c.join} →</SmartLink>
         </div>
         <figure className="contact-photo">
-          <img src="/assets/people/mithra-yohan-fernando.jpg" alt={site.proposer_name} width="900" height="1200" loading="eager" />
+          <img src="/assets/people/mithra-yohan-fernando.jpg" alt={site.proposer_name} width="900" height="1144" loading="eager" />
+          <figcaption>Photo: Thinuka Ransidu · FASEXPLORE 2025</figcaption>
         </figure>
       </section>
       <Footer />

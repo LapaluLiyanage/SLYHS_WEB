@@ -229,8 +229,6 @@ img { display: block; max-width: 100%; }
 .badge:hover { border-color: rgba(220, 255, 180, .45); color: #fff; }
 .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: pulse 2.2s ease-in-out infinite; }
 .badge-new { color: var(--lime); font-weight: 500; }
-.badge-chev { opacity: .6; transition: transform .3s var(--ease); }
-.badge:hover .badge-chev { transform: translateX(3px); }
 @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(201, 238, 110, .7), 0 0 8px var(--lime); } 50% { box-shadow: 0 0 0 6px rgba(201, 238, 110, 0), 0 0 8px var(--lime); } }
 
 .hero-title { margin: 0; font-weight: 500; font-size: clamp(44px, 7.4vw, 104px); line-height: 1; letter-spacing: -.035em; text-wrap: balance; }

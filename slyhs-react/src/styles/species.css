@@ -234,15 +234,6 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 .learn-why > div { background: rgba(255, 255, 255, .025); }
 .learn-why h3, .learn-groups h3 { margin: 0; font-size: 19px; font-weight: 500; }
 .learn-why p, .learn-groups p { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--ink-66); font-weight: 300; }
-.learn-species { width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
-.learn-sp { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 18px; border: 1px solid var(--line); color: var(--ink); }
-.learn-sp:hover { color: var(--ink); border-color: rgba(212, 242, 124, .4); }
-.learn-thumb { flex: none; width: 64px; height: 64px; border-radius: 14px; overflow: hidden; background: rgba(201, 238, 110, .1); }
-.learn-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.learn-sp-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.learn-sp-text strong { font-weight: 500; font-size: 15.5px; }
-.learn-sp-text em { font-family: var(--serif); font-size: 15px; color: var(--lime-2); }
-.learn-sp-text span { font-size: 12px; color: var(--ink-50); }
 .learn-rules ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.6; color: var(--ink-78); font-weight: 300; max-width: 720px; }
 .learn-rules { padding-bottom: clamp(56px, 7vw, 96px); }
 
@@ -294,7 +285,6 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 }
 
 /* countdown timers */
-.badge-timer { font-variant-numeric: tabular-nums; font-size: 12px; padding: 3px 9px; border-radius: 999px; background: rgba(201, 238, 110, .14); color: var(--lime-2); }
 .event-count { display: flex; gap: 8px; }
 .event-count span { display: flex; flex-direction: column; align-items: center; min-width: 52px; padding: 8px 6px; border-radius: 12px; background: rgba(201, 238, 110, .08); border: 1px solid rgba(201, 238, 110, .22); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-66); }
 .event-count b { font-size: 22px; font-weight: 500; letter-spacing: 0; color: var(--lime-2); font-variant-numeric: tabular-nums; }
