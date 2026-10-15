@@ -107,7 +107,9 @@ a.sp-credit:hover { color: var(--lime-2); }
 
 @media (max-width: 899px) {
   .sp-grid { grid-template-columns: minmax(0, 1fr); }
-  .sp-img { aspect-ratio: 4 / 3; }
+  /* iOS Safari ignores aspect-ratio on a stretched grid item whose only child is absolutely positioned, so the box collapsed to 0 height */
+  .sp-img { aspect-ratio: 4 / 3; align-self: start; width: 100%; height: auto; min-height: 66vw; }
+  @supports (min-height: 1svh) { .sp-img { min-height: 66svw; } }
   .sp-info { height: auto; overflow: visible; }
 }
 

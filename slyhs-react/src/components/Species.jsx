@@ -191,7 +191,7 @@ export default function Species() {
                 return (
                   <button type="button" role="tab" key={s.name} data-sp-tab={i} aria-selected={i === sp} className={'sp-tab' + (i === sp ? ' on' : '')} onClick={() => setSp(i)}>
                     <span className="sp-thumb" style={{ borderColor: s.venom ? '#E87060' : 'rgba(168,219,90,.7)' }}>
-                      <span>{t && <img src={t} alt="" loading="lazy" />}</span>
+                      <span>{t && <img src={t} alt="" decoding="async" />}</span>
                     </span>
                     <span>{s.name}</span>
                     <span className="sp-kind">{s.kind.replace(/s$/, '')}</span>
