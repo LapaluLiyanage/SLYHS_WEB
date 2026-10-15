@@ -33,7 +33,7 @@ function useAsync(fn, deps) {
 }
 
 function Msg({ children, kind = 'ok' }) {
-  return children ? <p className={'ad-msg ad-' + kind} role={kind === 'err' ? 'alert' : 'status'}>{children}</p> : null;
+  return children ? <p className={'adm-msg adm-' + kind} role={kind === 'err' ? 'alert' : 'status'}>{children}</p> : null;
 }
 
 /* ---------------------------------------------------------------- login */
@@ -48,15 +48,15 @@ function Login({ onDone }) {
     try { await signIn(email.trim(), pw); onDone(); } catch (x) { setErr(x.message); } finally { setBusy(false); }
   };
   return (
-    <div className="ad-login">
-      <form onSubmit={submit} className="ad-card">
-        <span className="ad-brand">SLYHS</span>
+    <div className="adm-login">
+      <form onSubmit={submit} className="adm-card">
+        <span className="adm-brand">SLYHS</span>
         <h1>Admin sign in</h1>
         <label>Email<input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
         <label>Password<input type="password" required autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} /></label>
         <Msg kind="err">{err}</Msg>
-        <button className="ad-btn ad-primary" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
-        <a href="/" className="ad-link">← Back to the website</a>
+        <button className="adm-btn adm-primary" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
+        <a href="/" className="adm-link">← Back to the website</a>
       </form>
     </div>
   );
@@ -73,14 +73,14 @@ function SetPassword({ onDone }) {
     try { await setPassword(pw); passwordDone(); onDone(); } catch (x) { setErr(x.message); } finally { setBusy(false); }
   };
   return (
-    <div className="ad-login">
-      <form onSubmit={submit} className="ad-card">
-        <span className="ad-brand">SLYHS</span>
+    <div className="adm-login">
+      <form onSubmit={submit} className="adm-card">
+        <span className="adm-brand">SLYHS</span>
         <h1>Choose your password</h1>
-        <p className="ad-hint">{sessionEmail()} is confirmed. Pick a password to use for future sign-ins.</p>
+        <p className="adm-hint">{sessionEmail()} is confirmed. Pick a password to use for future sign-ins.</p>
         <label>New password<input type="password" required minLength={8} autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} /></label>
         <Msg kind="err">{err}</Msg>
-        <button className="ad-btn ad-primary" disabled={busy}>{busy ? 'Saving…' : 'Save and continue'}</button>
+        <button className="adm-btn adm-primary" disabled={busy}>{busy ? 'Saving…' : 'Save and continue'}</button>
       </form>
     </div>
   );
@@ -97,12 +97,12 @@ function Overview({ go }) {
     <>
       <h2>Overview</h2>
       <Msg kind="err">{st.error}</Msg>
-      <div className="ad-stats">
+      <div className="adm-stats">
         <button onClick={() => go('members')}><b>{d ? d.members : '…'}</b><span>Members registered</span></button>
         <button onClick={() => go('newsletter')}><b>{d ? d.subs : '…'}</b><span>Newsletter subscribers</span></button>
         <button onClick={() => go('events')}><b>{d ? d.events : '…'}</b><span>Events</span></button>
       </div>
-      <div className="ad-card ad-help">
+      <div className="adm-card adm-help">
         <strong>What you can do here</strong>
         <ul>
           <li><b>Events</b>: set the date and meeting link of the first meeting, add or hide events. The website updates by itself.</li>
@@ -140,21 +140,21 @@ function EventCard({ ev, onSaved, onDeleted }) {
     try { if (!ev.isNew) await remove('events', 'id', f.id); onDeleted(); } catch (x) { setMsg({ kind: 'err', text: x.message }); }
   };
   return (
-    <div className="ad-card ad-event">
-      <div className="ad-grid">
-        <label className="ad-wide">Title<input value={f.title} onChange={set('title')} /></label>
+    <div className="adm-card adm-event">
+      <div className="adm-grid">
+        <label className="adm-wide">Title<input value={f.title} onChange={set('title')} /></label>
         <label>Date and time (Sri Lanka time)<input type="datetime-local" value={f.when} onChange={set('when')} /><small>Empty = date not decided, shows "Coming soon"</small></label>
         <label>Meeting link<input type="url" placeholder="https://zoom.us/j/…" value={f.link} onChange={set('link')} /><small>The "Join the meeting" button uses this</small></label>
         <label>Label<input value={f.tag} onChange={set('tag')} /></label>
         <label>Where<input value={f.where_text} onChange={set('where_text')} placeholder="Online · Zoom" /></label>
         <label>Language<input value={f.lang_text} onChange={set('lang_text')} placeholder="Sinhala, Tamil, English" /></label>
         <label>Order<input type="number" value={f.sort_order} onChange={set('sort_order')} /></label>
-        <label className="ad-check"><input type="checkbox" checked={f.featured} onChange={set('featured')} /> Highlight as the first meeting</label>
-        <label className="ad-check"><input type="checkbox" checked={f.published} onChange={set('published')} /> Show on the website</label>
+        <label className="adm-check"><input type="checkbox" checked={f.featured} onChange={set('featured')} /> Highlight as the first meeting</label>
+        <label className="adm-check"><input type="checkbox" checked={f.published} onChange={set('published')} /> Show on the website</label>
       </div>
-      <div className="ad-row">
-        <button className="ad-btn ad-primary" onClick={save}>Save</button>
-        <button className="ad-btn ad-danger" onClick={del}>Delete</button>
+      <div className="adm-row">
+        <button className="adm-btn adm-primary" onClick={save}>Save</button>
+        <button className="adm-btn adm-danger" onClick={del}>Delete</button>
         <Msg kind={msg.kind}>{msg.text}</Msg>
       </div>
     </div>
@@ -167,10 +167,10 @@ function Events() {
   const rows = st.data || [];
   return (
     <>
-      <div className="ad-head"><h2>Events</h2><button className="ad-btn" onClick={() => setExtra((x) => [...x, blankEvent()])}>+ Add event</button></div>
-      <p className="ad-hint">Set a date and the website shows it automatically; a meeting link turns the button into "Join the meeting". After the start time passes, the card is marked as a past event.</p>
+      <div className="adm-head"><h2>Events</h2><button className="adm-btn" onClick={() => setExtra((x) => [...x, blankEvent()])}>+ Add event</button></div>
+      <p className="adm-hint">Set a date and the website shows it automatically; a meeting link turns the button into "Join the meeting". After the start time passes, the card is marked as a past event.</p>
       <Msg kind="err">{st.error}</Msg>
-      {st.loading && <p className="ad-hint">Loading…</p>}
+      {st.loading && <p className="adm-hint">Loading…</p>}
       {!st.loading && !st.error && !rows.length && !extra.length && <Msg kind="err">No events yet. Run supabase/admin_setup.sql (it adds the first three), or click Add event.</Msg>}
       {rows.map((ev) => <EventCard key={ev.id} ev={ev} onSaved={reload} onDeleted={reload} />)}
       {extra.map((ev) => <EventCard key={ev.id} ev={ev} onSaved={() => { setExtra((x) => x.filter((e) => e.id !== ev.id)); reload(); }} onDeleted={() => setExtra((x) => x.filter((e) => e.id !== ev.id))} />)}
@@ -200,13 +200,13 @@ function Settings() {
       <h2>Site settings</h2>
       <Msg kind="err">{st.error}</Msg>
       {vals && (
-        <div className="ad-card">
-          <div className="ad-grid ad-one">
+        <div className="adm-card">
+          <div className="adm-grid adm-one">
             {SETTINGS.map(([k, label, type, hint]) => (
               <label key={k}>{label}<input type={type === 'text' ? 'text' : type} value={vals[k]} onChange={(e) => setVals((p) => ({ ...p, [k]: e.target.value }))} /><small>{hint}</small></label>
             ))}
           </div>
-          <div className="ad-row"><button className="ad-btn ad-primary" onClick={save}>Save settings</button><Msg kind={msg.kind}>{msg.text}</Msg></div>
+          <div className="adm-row"><button className="adm-btn adm-primary" onClick={save}>Save settings</button><Msg kind={msg.kind}>{msg.text}</Msg></div>
         </div>
       )}
     </>
@@ -240,20 +240,20 @@ function PostCard({ post, onSaved, onDeleted }) {
     try { if (!post.isNew) await remove('posts', 'slug', post.slug); onDeleted(); } catch (x) { setMsg({ kind: 'err', text: x.message }); }
   };
   return (
-    <div className="ad-card">
-      <div className="ad-grid">
-        <label className="ad-wide">Title<input value={f.title} onChange={set('title')} /></label>
+    <div className="adm-card">
+      <div className="adm-grid">
+        <label className="adm-wide">Title<input value={f.title} onChange={set('title')} /></label>
         <label>Web address {post.isNew ? '' : '(fixed)'}<input value={post.isNew ? f.slug : post.slug} disabled={!post.isNew} placeholder={slugify(f.title) || 'my-first-post'} onChange={set('slug')} /><small>/blog/{post.isNew ? (f.slug || slugify(f.title) || '…') : post.slug}</small></label>
         <label>Author<input value={f.author} onChange={set('author')} /></label>
-        <label className="ad-wide">Cover image link (optional)<input type="url" placeholder="https://…" value={f.cover_url} onChange={set('cover_url')} /></label>
-        <label className="ad-wide">Short summary<input value={f.excerpt} onChange={set('excerpt')} /><small>Shown on the blog list and under the title</small></label>
-        <label className="ad-wide">Post text<textarea rows={14} value={f.body} onChange={set('body')} /><small>Plain text. Start a heading with "## ". Separate paragraphs with a blank line.</small></label>
-        <label className="ad-check"><input type="checkbox" checked={f.published} onChange={set('published')} /> Published (visible on the website)</label>
+        <label className="adm-wide">Cover image link (optional)<input type="url" placeholder="https://…" value={f.cover_url} onChange={set('cover_url')} /></label>
+        <label className="adm-wide">Short summary<input value={f.excerpt} onChange={set('excerpt')} /><small>Shown on the blog list and under the title</small></label>
+        <label className="adm-wide">Post text<textarea rows={14} value={f.body} onChange={set('body')} /><small>Plain text. Start a heading with "## ". Separate paragraphs with a blank line.</small></label>
+        <label className="adm-check"><input type="checkbox" checked={f.published} onChange={set('published')} /> Published (visible on the website)</label>
       </div>
-      <div className="ad-row">
-        <button className="ad-btn ad-primary" onClick={save}>Save</button>
-        {!post.isNew && <a className="ad-link" href={'/blog/' + post.slug} target="_blank" rel="noopener noreferrer">View ↗</a>}
-        <button className="ad-btn ad-danger" onClick={del}>Delete</button>
+      <div className="adm-row">
+        <button className="adm-btn adm-primary" onClick={save}>Save</button>
+        {!post.isNew && <a className="adm-link" href={'/blog/' + post.slug} target="_blank" rel="noopener noreferrer">View ↗</a>}
+        <button className="adm-btn adm-danger" onClick={del}>Delete</button>
         <Msg kind={msg.kind}>{msg.text}</Msg>
       </div>
     </div>
@@ -266,13 +266,13 @@ function Posts() {
   const rows = st.data || [];
   return (
     <>
-      <div className="ad-head"><h2>Blog posts</h2><button className="ad-btn" onClick={() => setExtra((x) => [{ ...blankPost(), key: Date.now() }, ...x])}>+ New post</button></div>
-      <p className="ad-hint">Only published posts appear on the website. While there are none, the blog page shows "Coming soon" with the newsletter signup.</p>
+      <div className="adm-head"><h2>Blog posts</h2><button className="adm-btn" onClick={() => setExtra((x) => [{ ...blankPost(), key: Date.now() }, ...x])}>+ New post</button></div>
+      <p className="adm-hint">Only published posts appear on the website. While there are none, the blog page shows "Coming soon" with the newsletter signup.</p>
       <Msg kind="err">{st.error}</Msg>
-      {st.loading && <p className="ad-hint">Loading…</p>}
+      {st.loading && <p className="adm-hint">Loading…</p>}
       {extra.map((p) => <PostCard key={p.key} post={p} onSaved={() => { setExtra((x) => x.filter((e) => e.key !== p.key)); reload(); }} onDeleted={() => setExtra((x) => x.filter((e) => e.key !== p.key))} />)}
       {rows.map((p) => <PostCard key={p.slug + p.updated_at} post={p} onSaved={reload} onDeleted={reload} />)}
-      {!st.loading && !st.error && !rows.length && !extra.length && <p className="ad-hint">No posts yet.</p>}
+      {!st.loading && !st.error && !rows.length && !extra.length && <p className="adm-hint">No posts yet.</p>}
     </>
   );
 }
@@ -297,17 +297,17 @@ function PolicyEditor({ slug, saved, onSaved }) {
     try { await remove('policies', 'slug', slug); onSaved(); setMsg({ kind: 'ok', text: 'Back to the original text.' }); setF({ title: base.title, lead: base.lead, updated: base.updated, text: sectionsToText(base.sections) }); } catch (x) { setMsg({ kind: 'err', text: x.message }); }
   };
   return (
-    <div className="ad-card">
-      <div className="ad-head"><strong>/{slug}</strong><a className="ad-link" href={'/' + slug} target="_blank" rel="noopener noreferrer">View page ↗</a></div>
-      <div className="ad-grid">
+    <div className="adm-card">
+      <div className="adm-head"><strong>/{slug}</strong><a className="adm-link" href={'/' + slug} target="_blank" rel="noopener noreferrer">View page ↗</a></div>
+      <div className="adm-grid">
         <label>Title<input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></label>
         <label>Last updated<input value={f.updated} onChange={(e) => setF({ ...f, updated: e.target.value })} /></label>
-        <label className="ad-wide">Short intro<input value={f.lead} onChange={(e) => setF({ ...f, lead: e.target.value })} /></label>
-        <label className="ad-wide">Content<textarea rows={16} value={f.text} onChange={(e) => setF({ ...f, text: e.target.value })} /><small>Start each section with "## Heading". Separate paragraphs with a blank line.</small></label>
+        <label className="adm-wide">Short intro<input value={f.lead} onChange={(e) => setF({ ...f, lead: e.target.value })} /></label>
+        <label className="adm-wide">Content<textarea rows={16} value={f.text} onChange={(e) => setF({ ...f, text: e.target.value })} /><small>Start each section with "## Heading". Separate paragraphs with a blank line.</small></label>
       </div>
-      <div className="ad-row">
-        <button className="ad-btn ad-primary" onClick={save}>Save</button>
-        {saved && <button className="ad-btn" onClick={reset}>Reset to original</button>}
+      <div className="adm-row">
+        <button className="adm-btn adm-primary" onClick={save}>Save</button>
+        {saved && <button className="adm-btn" onClick={reset}>Reset to original</button>}
         <Msg kind={msg.kind}>{msg.text}</Msg>
       </div>
     </div>
@@ -319,7 +319,7 @@ function Policies() {
   return (
     <>
       <h2>Policies</h2>
-      <p className="ad-hint">The text shown here is what the page currently says. Edit and save to publish your version.</p>
+      <p className="adm-hint">The text shown here is what the page currently says. Edit and save to publish your version.</p>
       <Msg kind="err">{st.error}</Msg>
       {st.data && Object.keys(POLICIES).map((slug) => {
         const row = st.data.find((r) => r.slug === slug);
@@ -348,21 +348,21 @@ function DataTable({ table, title, idCol, keyCols, csvName }) {
   };
   return (
     <>
-      <div className="ad-head"><h2>{title} <span className="ad-count">{rows.length}</span></h2>
-        <button className="ad-btn" disabled={!rows.length} onClick={() => download(csvName + '-' + new Date().toISOString().slice(0, 10) + '.csv', toCsv(shown))}>Download CSV{q ? ' (filtered)' : ''}</button></div>
-      <input className="ad-search" type="search" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
+      <div className="adm-head"><h2>{title} <span className="adm-count">{rows.length}</span></h2>
+        <button className="adm-btn" disabled={!rows.length} onClick={() => download(csvName + '-' + new Date().toISOString().slice(0, 10) + '.csv', toCsv(shown))}>Download CSV{q ? ' (filtered)' : ''}</button></div>
+      <input className="adm-search" type="search" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
       <Msg kind="err">{st.error}</Msg>
-      {st.loading && <p className="ad-hint">Loading…</p>}
-      {!st.loading && !st.error && !rows.length && <p className="ad-hint">Nothing here yet.</p>}
+      {st.loading && <p className="adm-hint">Loading…</p>}
+      {!st.loading && !st.error && !rows.length && <p className="adm-hint">Nothing here yet.</p>}
       {shown.length > 0 && (
-        <div className="ad-tablewrap">
+        <div className="adm-tablewrap">
           <table>
             <thead><tr>{cols.map((c) => <th key={c}>{pretty(c)}</th>)}<th /></tr></thead>
             <tbody>
               {shown.map((r) => (
                 <tr key={r[idCol] || JSON.stringify(r)}>
                   {cols.map((c) => <td key={c}>{shorten(r[c])}</td>)}
-                  <td className="ad-actions"><button className="ad-btn ad-sm" onClick={() => setOpen(r)}>View</button>{canDelete && <button className="ad-btn ad-sm ad-danger" onClick={() => del(r)}>Delete</button>}</td>
+                  <td className="adm-actions"><button className="adm-btn adm-sm" onClick={() => setOpen(r)}>View</button>{canDelete && <button className="adm-btn adm-sm adm-danger" onClick={() => del(r)}>Delete</button>}</td>
                 </tr>
               ))}
             </tbody>
@@ -370,9 +370,9 @@ function DataTable({ table, title, idCol, keyCols, csvName }) {
         </div>
       )}
       {open && (
-        <div className="ad-modal" role="dialog" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) setOpen(null); }}>
-          <div className="ad-card ad-modalbox">
-            <div className="ad-head"><strong>Record details</strong><button className="ad-btn ad-sm" onClick={() => setOpen(null)}>Close</button></div>
+        <div className="adm-modal" role="dialog" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) setOpen(null); }}>
+          <div className="adm-card adm-modalbox">
+            <div className="adm-head"><strong>Record details</strong><button className="adm-btn adm-sm" onClick={() => setOpen(null)}>Close</button></div>
             <dl>{Object.entries(open).map(([k, v]) => <div key={k}><dt>{pretty(k)}</dt><dd>{v === null || v === '' ? '—' : typeof v === 'object' ? JSON.stringify(v) : String(v)}</dd></div>)}</dl>
           </div>
         </div>
@@ -398,22 +398,22 @@ export default function Admin() {
     isAdmin().then((ok) => setState(ok ? 'in' : 'out'));
   }, [state]);
 
-  if (!configured()) return <div className="ad-login"><div className="ad-card"><h1>Database not configured</h1><p>Set VITE_SUPABASE_URL and VITE_SUPABASE_KEY (see .env.example).</p></div></div>;
-  if (state === 'checking') return <div className="ad-login"><p className="ad-hint">Checking sign-in…</p></div>;
+  if (!configured()) return <div className="adm-login"><div className="adm-card"><h1>Database not configured</h1><p>Set VITE_SUPABASE_URL and VITE_SUPABASE_KEY (see .env.example).</p></div></div>;
+  if (state === 'checking') return <div className="adm-login"><p className="adm-hint">Checking sign-in…</p></div>;
   if (state === 'setpw') return <SetPassword onDone={() => setState('checking')} />;
   if (state === 'out') return <Login onDone={() => setState('in')} />;
 
   const out = async () => { await signOut(); setState('out'); };
   return (
-    <div className="ad-shell">
-      <aside className="ad-side">
-        <span className="ad-brand">SLYHS admin</span>
+    <div className="adm-shell">
+      <aside className="adm-side">
+        <span className="adm-brand">SLYHS admin</span>
         <nav aria-label="Admin sections">
           {TABS.map(([k, label]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{label}</button>)}
         </nav>
-        <div className="ad-who"><span>{sessionEmail()}</span><button className="ad-btn ad-sm" onClick={out}>Sign out</button><a className="ad-link" href="/">View website ↗</a></div>
+        <div className="adm-who"><span>{sessionEmail()}</span><button className="adm-btn adm-sm" onClick={out}>Sign out</button><a className="adm-link" href="/">View website ↗</a></div>
       </aside>
-      <main className="ad-main">
+      <main className="adm-main">
         {tab === 'overview' && <Overview go={setTab} />}
         {tab === 'events' && <Events />}
         {tab === 'settings' && <Settings />}
