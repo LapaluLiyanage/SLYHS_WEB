@@ -1,6 +1,6 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-// Sends the welcome email for one registration, in the language(s) the member picked.
+// Sends the welcome email for one registration (English).
 // Called by a database trigger right after the registration is saved.
 // Safe to call twice: the first call claims the row, so a repeat never sends a second email.
 // The footer (society name, contact person, links) reads the site settings edited in the admin panel.
@@ -12,7 +12,8 @@ const MAIL_FROM = Deno.env.get('MAIL_FROM') ?? 'SLYHS <onboarding@resend.dev>';
 const MAIL_REPLY_TO = Deno.env.get('MAIL_REPLY_TO') ?? '';
 const SITE_URL = (Deno.env.get('SITE_URL') ?? 'https://slyhs-web.vercel.app').replace(/\/+$/, '');
 
-type Lang = 'English' | 'Sinhala' | 'Tamil';
+// Welcome emails are sent in English only.
+type Lang = 'English';
 
 const TEXT: Record<Lang, { subject: (n: string) => string; hello: (n: string) => string; thanks: string; tier: string; next: string; nextBody: string; safe: string; sign: string }> = {
   English: {
@@ -24,45 +25,15 @@ const TEXT: Record<Lang, { subject: (n: string) => string; hello: (n: string) =>
     nextBody: 'Our first online meeting is planned for November 2026 (date to be confirmed). We will email you the details, and your district WhatsApp group link if you asked for one.',
     safe: 'Your details are used only for society communication. We never share the locations of rare species. You can leave at any time by replying to this email.',
     sign: 'The SLYHS committee'
-  },
-  Sinhala: {
-    subject: (n) => `SLYHS වෙත සාදරයෙන් පිළිගනිමු, ${n}!`,
-    hello: (n) => `සාදරයෙන් පිළිගනිමු, ${n}!`,
-    thanks: 'ශ්‍රී ලංකා තරුණ උරග විද්‍යාඥයින්ගේ සංගමයේ ලියාපදිංචි වීම ගැන ස්තූතියි. ඔබව අප සමඟ ලැබීම සතුටක්.',
-    tier: 'ඔබ එක් වන්නේ',
-    next: 'ඊළඟට සිදුවන්නේ',
-    nextBody: 'අපගේ පළමු මාර්ගගත රැස්වීම 2026 නොවැම්බර් මාසයේ පැවැත්වීමට සැලසුම් කර ඇත (දිනය තහවුරු කර නැත). විස්තර, සහ ඔබ ඉල්ලා ඇත්නම් ඔබේ දිස්ත්‍රික්කයේ WhatsApp කණ්ඩායමේ සබැඳිය විද්‍යුත් තැපෑලෙන් එවන්නෙමු.',
-    safe: 'ඔබේ තොරතුරු භාවිතා කරන්නේ සංගමයේ සන්නිවේදනයට පමණි. දුර්ලභ විශේෂවල ස්ථාන කිසිවිටෙක බෙදා නොගනිමු. මෙම ඊමේලයට පිළිතුරු දීමෙන් ඔබට ඕනෑම වේලාවක ඉවත් විය හැක.',
-    sign: 'SLYHS කමිටුව'
-  },
-  Tamil: {
-    subject: (n) => `SLYHS-க்கு வரவேற்கிறோம், ${n}!`,
-    hello: (n) => `வரவேற்கிறோம், ${n}!`,
-    thanks: 'இலங்கை இளம் ஊர்வனவியலாளர் சங்கத்தில் பதிவு செய்ததற்கு நன்றி. நீங்கள் எங்களுடன் இணைவதில் மகிழ்ச்சி.',
-    tier: 'நீங்கள் இணைவது',
-    next: 'அடுத்து என்ன நடக்கும்',
-    nextBody: 'எங்கள் முதல் இணையக் கூட்டம் 2026 நவம்பரில் திட்டமிடப்பட்டுள்ளது (தேதி உறுதி செய்யப்படவில்லை). விவரங்களையும், நீங்கள் கேட்டிருந்தால் உங்கள் மாவட்ட WhatsApp குழுவின் இணைப்பையும் மின்னஞ்சலில் அனுப்புவோம்.',
-    safe: 'உங்கள் விவரங்கள் சங்கத் தொடர்புக்கு மட்டுமே பயன்படுத்தப்படும். அரிய இனங்களின் இடங்களை நாங்கள் ஒருபோதும் பகிர மாட்டோம். இந்த மின்னஞ்சலுக்குப் பதிலளிப்பதன் மூலம் எப்போது வேண்டுமானாலும் விலகலாம்.',
-    sign: 'SLYHS குழு'
   }
 };
 
-// footer wording per language; the first language the member picked is used
+// footer wording
 const FOOT: Record<Lang, { society: string; contact: string; phone: string; email: string; explore: string; links: [string, string][]; note: string }> = {
   English: {
     society: "Sri Lankan Young Herpetologists' Society", contact: 'Contact', phone: 'Phone', email: 'Email', explore: 'Explore',
     links: [['Website', ''], ['Learn', '/learn'], ['Join', '/join'], ['Contact', '/contact'], ['Privacy', '/privacy']],
     note: 'You received this email because you registered at the SLYHS website. Study, protect and share Sri Lanka’s reptiles and amphibians.'
-  },
-  Sinhala: {
-    society: 'ශ්‍රී ලංකා තරුණ උරග විද්‍යාඥ සංගමය', contact: 'සම්බන්ධ වන්න', phone: 'දුරකථන', email: 'විද්‍යුත් තැපෑල', explore: 'ගවේෂණය',
-    links: [['වෙබ් අඩවිය', ''], ['ඉගෙන ගන්න', '/learn'], ['එක්වන්න', '/join'], ['සම්බන්ධ වන්න', '/contact'], ['පෞද්ගලිකත්වය', '/privacy']],
-    note: 'ඔබ SLYHS වෙබ් අඩවියේ ලියාපදිංචි වූ නිසා මෙම ඊමේලය ලැබුණි. ශ්‍රී ලංකාවේ උරගයින් සහ උභයජීවීන් අධ්‍යයනය කරමු, ආරක්ෂා කරමු, බෙදාගනිමු.'
-  },
-  Tamil: {
-    society: 'இலங்கை இளம் ஊர்வனவியலாளர் சங்கம்', contact: 'தொடர்பு', phone: 'தொலைபேசி', email: 'மின்னஞ்சல்', explore: 'ஆராய்க',
-    links: [['இணையதளம்', ''], ['கற்க', '/learn'], ['சேர', '/join'], ['தொடர்பு', '/contact'], ['தனியுரிமை', '/privacy']],
-    note: 'நீங்கள் SLYHS இணையதளத்தில் பதிவு செய்ததால் இந்த மின்னஞ்சல் உங்களுக்கு அனுப்பப்பட்டது. இலங்கையின் ஊர்வன மற்றும் நீர்நில வாழ்வனவற்றை ஆய்வு செய்வோம், பாதுகாப்போம், பகிர்வோம்.'
   }
 };
 
@@ -115,9 +86,8 @@ function footerHtml(lang: Lang, s: Settings) {
 
 function buildEmail(row: { full_name: string; preferred_name: string | null; preferred_languages: string[]; tier: string }, settings: Settings) {
   const name = (row.preferred_name || row.full_name.split(' ')[0] || 'friend').trim();
-  const langs = (row.preferred_languages as Lang[]).filter((l) => l in TEXT);
-  const order: Lang[] = langs.length ? langs : ['English'];
-  const primary = order[0];
+  const order: Lang[] = ['English'];
+  const primary: Lang = 'English';
 
   const sections = order.map((l) => {
     const t = TEXT[l];
@@ -199,6 +169,7 @@ Deno.serve(async (req) => {
     headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: MAIL_FROM,
+      headers: { 'X-Entity-Ref-ID': id },
       to: [row.email],
       subject: mail.subject,
       html: mail.html,
